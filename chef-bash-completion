@@ -1,0 +1,196 @@
+#
+# bash completion for chef and knife command
+#
+__get_all_chef_nodes()
+{
+	echo `knife node list -c ${HOME}/chef-repo/.chef/knife.rb`
+}
+
+__get_all_site_cookbooks()
+{
+	ls ${HOME}/chef-repo/site-cookbooks/
+}
+
+_chef_completion()
+{
+	local cur prev cword
+	_get_comp_words_by_ref -n : cur prev cword
+
+	COMPREPLY=()
+	if [ "${cword}" -eq 1 ]; then
+		COMPREPLY=( $(compgen -W "exec env gem generate shell-init install update push push-archive show-policy diff provision export clean-policy-revisions clean-policy-cookbooks delete-policy-group delete-policy undelete describe-cookbook" -- "${cur}"))
+	elif [ "${cword}" -eq 2 ]; then
+		case "${prev}" in
+		generate)
+			COMPREPLY=( $(compgen -W "cookbook recipe attribute template file helpers lwrp resource repo policyfile generator build-cookbook" -- "${cur}"))
+			;;
+		esac
+	elif [ "${cword}" -eq 3 ]; then
+		case "${prev}" in
+		attribute)
+			compopt -o filenames
+			COMPREPLY=( $(compgen -d -- "${cur}"))
+		;;
+		cookbook)
+			compopt -o filenames
+			COMPREPLY=( $(compgen -d -- "${cur}"))
+		;;
+		file)
+			compopt -o filenames
+			COMPREPLY=( $(compgen -d -- "${cur}"))
+		;;
+		recipe)
+			compopt -o filenames
+			COMPREPLY=( $(compgen -d -- "${cur}"))
+		;;
+		template)
+			compopt -o filenames
+			COMPREPLY=( $(compgen -d -- "${cur}"))
+		;;
+		esac
+	elif [ "${cword}" -eq 4 ]; then
+		case "${COMP_WORDS[2]}" in
+		cookbook)
+			COMPREPLY=( $(compgen -W "-b --berks -C --copyright -d --delivery -m --email -a --generator-arg -h --help --kitchen -I --license --pipeline -P --policy -V --verbose -v --version -g --generator-cookbook" -- "${cur}"))
+		;;
+		esac
+	elif [ "${cword}" -eq 5 ]; then
+		case "${COMP_WORDS[2]}" in
+		attribute|recipe)
+			COMPREPLY=( $(compgen -W "-C --copyright -m --email -a --generator-arg -h --help -I --license -v --version -g --generator-cookbook" -- "${cur}"))
+		;;
+		file|template)
+			COMPREPLY=( $(compgen -W "-C --copyright -m --email -a --generator-arg -h --help -I --license -s --source -v --version -g --generator-cookbook" -- "${cur}"))
+		;;
+		esac
+	fi
+}
+
+_knife_completion()
+{
+	local cur prev cword
+	_get_comp_words_by_ref -n : cur prev cword
+
+	if [ -z "${__all_chef_nodes}" ];then
+		__all_chef_nodes=$(__get_all_chef_nodes)
+	fi
+
+	if [ -z "${__all_site_cookbooks}" ];then
+		__all_site_cookbooks=$(__get_all_site_cookbooks)
+	fi
+
+	COMPREPLY=()
+	if [ "${cword}" -le 2 ]; then
+		case "${prev}" in
+		knife)
+			COMPREPLY=( $(compgen -W "bootstrap client cookbook environment node role search ssh" -- "${cur}"))
+		;;
+		client)
+			COMPREPLY=( $(compgen -W "create delete edit key list reregister show" -- "${cur}"))
+		;;
+		cookbook)
+			COMPREPLY=( $(compgen -W "bulk delete download list metadata show test upload site" -- "${cur}"))
+		;;
+		environment)
+			COMPREPLY=( $(compgen -W "compare create delete edit from list show" -- "${cur}"))
+		;;
+		node)
+			COMPREPLY=( $(compgen -W "bulk create delete edit environment from list policy run_list show status" -- "${cur}"))
+		;;
+		role)
+			COMPREPLY=( $(compgen -W "bulk create delete edit env_run_list from list run_list show" -- "${cur}"))
+		;;
+		esac
+	elif [ "${cword}" -ge 3 ]; then
+		case "${COMP_WORDS[1]}" in
+		node)
+			case "${COMP_WORDS[2]}" in
+			run_list)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "add remove set" -- "${cur}"))
+				elif [ "${cword}" -eq 4 ];then
+					COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
+				elif [ "${cword}" -ge 5 ];then
+					COMPREPLY=( $(compgen -W "${__all_site_cookbooks}" -- "${cur}"))
+				fi
+				;;
+			environment)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "set" -- "${cur}"))
+				elif [ "${cword}" -eq 4 -a "${COMP_WORDS[3]}" == "set" ];then
+					COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
+				fi
+				;;
+			show)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
+				elif [ "${cword}" -eq 4 ];then
+					COMPREPLY=( $(compgen -W "-a --attribute -F --format -l --long -r --run-list" -- "${cur}"))
+				fi
+				;;
+			edit)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
+				elif [ "${cword}" -eq 4 ];then
+					COMPREPLY=( $(compgen -W "-a --all -e --editor -E --environment -F --format" -- "${cur}"))
+				fi
+				;;
+			delete|status)
+				COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
+				;;
+			esac
+			;;
+		client)
+			case "${COMP_WORDS[2]}" in
+			delete|edit|reregister|show)
+				COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
+				;;
+			esac
+			;;
+		cookbook)
+			case "${COMP_WORDS[2]}" in
+			test|upload)
+				COMPREPLY=( $(compgen -W "${__all_site_cookbooks}" -- "${cur}"))
+				;;
+			delete)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "${__all_site_cookbooks}" -- "${cur}"))
+				fi
+				;;
+			download)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "${__all_site_cookbooks}" -- "${cur}"))
+				fi
+				;;
+			esac
+			;;
+		role)
+			case "${COMP_WORDS[2]}" in
+			run_list)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "add clear remove replace set" -- "${cur}"))
+				elif [ "${cword}" -ge 5 ];then
+					COMPREPLY=( $(compgen -W "${__all_site_cookbooks}" -- "${cur}"))
+				fi
+				;;
+			esac
+			;;
+		ssh)
+			if [ "${cword}" -ge 4 ];then
+				COMPREPLY=( $(compgen -W "-C --concurrency -E --environment -u --user -a --attribute -G --ssh-gateway -i --ssh-identity-file -p --ssh-port -t --ssh-timeout -x --ssh-user --tmux-split" -- "${cur}"))
+			fi
+			;;
+		search)
+			COMPREPLY=( $(compgen -W "-a --attribute -i --id-only -l --long -r --run-list" -- "${cur}"))
+			;;
+		bootstrap)
+			COMPREPLY=( $(compgen -W "-N --node-name -E --environment -x --ssh-user --sudo --bootstrap-install-command --bootstrap-preinstall-command --bootstrap-proxy" -- "${cur}"))
+			;;
+		esac
+	fi
+}
+_have chef && \
+  complete -F _chef_completion chef
+
+_have knife && \
+  complete -F _knife_completion knife
