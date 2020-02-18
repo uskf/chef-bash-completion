@@ -3,12 +3,18 @@
 #
 __get_all_chef_nodes()
 {
-	echo `knife node list -c ${HOME}/chef-repo/.chef/knife.rb`
+	if [ -f ${HOME}/chef-repo/.chef/config.rb ];then
+		knife node list -c ${HOME}/chef-repo/.chef/config.rb
+	elif [ -f ${HOME}/chef-repo/.chef/knife.rb ];then
+		knife node list -c ${HOME}/chef-repo/.chef/knife.rb
+	fi
 }
 
 __get_all_site_cookbooks()
 {
-	ls ${HOME}/chef-repo/site-cookbooks/
+	if [ -d ${HOME}/chef-repo/site-cookbooks/ ];then
+		ls ${HOME}/chef-repo/site-cookbooks/
+	fi
 }
 
 _chef_completion()
@@ -30,38 +36,38 @@ _chef_completion()
 		attribute)
 			compopt -o filenames
 			COMPREPLY=( $(compgen -d -- "${cur}"))
-		;;
+			;;
 		cookbook)
 			compopt -o filenames
 			COMPREPLY=( $(compgen -d -- "${cur}"))
-		;;
+			;;
 		file)
 			compopt -o filenames
 			COMPREPLY=( $(compgen -d -- "${cur}"))
-		;;
+			;;
 		recipe)
 			compopt -o filenames
 			COMPREPLY=( $(compgen -d -- "${cur}"))
-		;;
+			;;
 		template)
 			compopt -o filenames
 			COMPREPLY=( $(compgen -d -- "${cur}"))
-		;;
+			;;
 		esac
 	elif [ "${cword}" -eq 4 ]; then
 		case "${COMP_WORDS[2]}" in
 		cookbook)
 			COMPREPLY=( $(compgen -W "-b --berks -C --copyright -d --delivery -m --email -a --generator-arg -h --help --kitchen -I --license --pipeline -P --policy -V --verbose -v --version -g --generator-cookbook" -- "${cur}"))
-		;;
+			;;
 		esac
 	elif [ "${cword}" -eq 5 ]; then
 		case "${COMP_WORDS[2]}" in
 		attribute|recipe)
 			COMPREPLY=( $(compgen -W "-C --copyright -m --email -a --generator-arg -h --help -I --license -v --version -g --generator-cookbook" -- "${cur}"))
-		;;
+			;;
 		file|template)
 			COMPREPLY=( $(compgen -W "-C --copyright -m --email -a --generator-arg -h --help -I --license -s --source -v --version -g --generator-cookbook" -- "${cur}"))
-		;;
+			;;
 		esac
 	fi
 }
@@ -84,22 +90,22 @@ _knife_completion()
 		case "${prev}" in
 		knife)
 			COMPREPLY=( $(compgen -W "bootstrap client cookbook environment node role search ssh" -- "${cur}"))
-		;;
+			;;
 		client)
 			COMPREPLY=( $(compgen -W "create delete edit key list reregister show" -- "${cur}"))
-		;;
+			;;
 		cookbook)
 			COMPREPLY=( $(compgen -W "bulk delete download list metadata show test upload site" -- "${cur}"))
-		;;
+			;;
 		environment)
 			COMPREPLY=( $(compgen -W "compare create delete edit from list show" -- "${cur}"))
-		;;
+			;;
 		node)
 			COMPREPLY=( $(compgen -W "bulk create delete edit environment from list policy run_list show status" -- "${cur}"))
-		;;
+			;;
 		role)
 			COMPREPLY=( $(compgen -W "bulk create delete edit env_run_list from list run_list show" -- "${cur}"))
-		;;
+			;;
 		esac
 	elif [ "${cword}" -ge 3 ]; then
 		case "${COMP_WORDS[1]}" in
