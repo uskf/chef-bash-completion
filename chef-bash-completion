@@ -81,9 +81,7 @@ _knife_completion()
 		__all_chef_nodes=$(__get_all_chef_nodes)
 	fi
 
-	if [ -z "${__all_site_cookbooks}" ];then
-		__all_site_cookbooks=$(__get_all_site_cookbooks)
-	fi
+	__all_site_cookbooks=$(__get_all_site_cookbooks)
 
 	COMPREPLY=()
 	if [ "${cword}" -le 2 ]; then
@@ -200,3 +198,8 @@ _have chef && \
 
 _have knife && \
   complete -F _knife_completion knife
+
+clear_chef_node_cache()
+{
+	export __all_chef_nodes=
+}
