@@ -1,19 +1,76 @@
 #
 # bash completion for chef and knife command
 #
-__get_all_chef_nodes()
+
+# chef repository directory name(relative path from ${HOME})
+if [ -z "${__repodir}" ];then
+  __repodir="chef-repo"
+fi
+
+__get_chef_recipes()
 {
-	if [ -f ${HOME}/chef-repo/.chef/config.rb ];then
-		knife node list -c ${HOME}/chef-repo/.chef/config.rb
-	elif [ -f ${HOME}/chef-repo/.chef/knife.rb ];then
-		knife node list -c ${HOME}/chef-repo/.chef/knife.rb
+	if [ -z "${__chef_recipes}" ];then
+		__chef_recipes=$(knife recipe list -c ${__chef_conf} | while read r;do echo "'recipe[$r]'";done)
 	fi
 }
 
-__get_all_site_cookbooks()
+__get_chef_cookbooks()
 {
-	if [ -d ${HOME}/chef-repo/site-cookbooks/ ];then
-		ls ${HOME}/chef-repo/site-cookbooks/
+	if [ -z "${__chef_cookbooks}" ];then
+		if [ -d ${HOME}/${__repodir}/site-cookbooks/ ];then
+			__chef_cookbooks=$(ls ${HOME}/${__repodir}/site-cookbooks/)
+		fi
+        else
+          echo "missing site-cookbooks directory"
+	fi
+}
+
+__get_chef_nodes()
+{
+	if [ -z "${__chef_nodes}" ];then
+		__chef_nodes=$(knife node list -c ${__chef_conf})
+	fi
+}
+
+__get_chef_clients()
+{
+	if [ -z "${__chef_clients}" ];then
+		__chef_clients=$(knife client list -c ${__chef_conf})
+	fi
+}
+
+__get_chef_databags()
+{
+	if [ -z "${__chef_databags}" ];then
+		__chef_databags=$(knife data bag list -c ${__chef_conf})
+	fi
+}
+
+__get_chef_roles()
+{
+	if [ -z "${__chef_roles}" ];then
+		__chef_roles=$(knife role list -c ${__chef_conf} | while read r;do echo "'role[$r]'";done;)
+	fi
+}
+
+__get_chef_roles_name()
+{
+	if [ -z "${__chef_roles_name}" ];then
+		__chef_roles_name=$(knife role list -c ${__chef_conf} | while read r;do echo "$r";done;)
+	fi
+}
+
+__get_chef_environments()
+{
+	if [ -z "${__chef_environments}" ];then
+		__chef_environments=$(knife environment list -c ${__chef_conf})
+	fi
+}
+
+__get_chef_users()
+{
+	if [ -z "${__chef_users}" ];then
+		__chef_users=$(knife user list -c ${__chef_conf})
 	fi
 }
 
@@ -77,17 +134,19 @@ _knife_completion()
 	local cur prev cword
 	_get_comp_words_by_ref -n : cur prev cword
 
-	if [ -z "${__all_chef_nodes}" ];then
-		__all_chef_nodes=$(__get_all_chef_nodes)
+	if [ -z "${__chef_conf}" ];then
+		if [ -f ${HOME}/${__repodir}/.chef/config.rb ];then
+			__chef_conf="${HOME}/${__repodir}/.chef/config.rb"
+		elif [ -f ${HOME}/${__repodir}/.chef/knife.rb ];then
+			__chef_conf="${HOME}/${__repodir}/.chef/knife.rb"
+		fi
 	fi
-
-	__all_site_cookbooks=$(__get_all_site_cookbooks)
 
 	COMPREPLY=()
 	if [ "${cword}" -le 2 ]; then
 		case "${prev}" in
 		knife)
-			COMPREPLY=( $(compgen -W "bootstrap client cookbook environment node role search ssh" -- "${cur}"))
+			COMPREPLY=( $(compgen -W "bootstrap client cookbook data environment node recipe role search ssh user" -- "${cur}"))
 			;;
 		client)
 			COMPREPLY=( $(compgen -W "create delete edit key list reregister show" -- "${cur}"))
@@ -95,100 +154,484 @@ _knife_completion()
 		cookbook)
 			COMPREPLY=( $(compgen -W "bulk delete download list metadata show test upload site" -- "${cur}"))
 			;;
+		data)
+			COMPREPLY=( $(compgen -W "bag" -- "${cur}"))
+			;;
 		environment)
 			COMPREPLY=( $(compgen -W "compare create delete edit from list show" -- "${cur}"))
 			;;
 		node)
-			COMPREPLY=( $(compgen -W "bulk create delete edit environment from list policy run_list show status" -- "${cur}"))
+			__node=""
+			COMPREPLY=( $(compgen -W "bulk create delete edit environment from list policy run_list show" -- "${cur}"))
+			;;
+		recipe)
+			COMPREPLY=( $(compgen -W "list" -- "${cur}"))
 			;;
 		role)
+			__chef_roles_name=
 			COMPREPLY=( $(compgen -W "bulk create delete edit env_run_list from list run_list show" -- "${cur}"))
+			;;
+		ssh)
+			__get_chef_nodes
+			__prefixed_nodes=$(for n in ${__chef_nodes};do echo "name:$n";done)
+			if [ "${cur:0:2}" == '"n' ];then
+				COMPREPLY=( $(compgen -P'"' -W "${__prefixed_nodes}" -- "${cur}"))
+			fi
+			;;
+		user)
+			COMPREPLY=( $(compgen -W "create delete edit key list reregister show" -- "${cur}"))
 			;;
 		esac
 	elif [ "${cword}" -ge 3 ]; then
+		# common options
+		if [ "${prev}" == "-c" -o "${prev}" == "--config" ];then
+			compopt -o filenames
+			COMPREPLY=( $(compgen -f -- "${cur}"))
+			return
+		elif [ "${prev}" == "-F" -o "${prev}" == "--format" ];then
+			COMPREPLY=( $(compgen -W "json text yaml pp" -- "${cur}"))
+			return
+		elif [ "${prev}" == "-s" -o \
+		       "${prev}" == "--server-url" -o \
+		       "${prev}" == "--chef-zero-host" -o \
+		       "${prev}" == "--chef-zero-port" -o \
+		       "${prev}" == "-k" -o \
+		       "${prev}" == "--key" -o \
+		       "${prev}" == "--config-option" -o \
+		       "${prev}" == "-u" -o \
+		       "${prev}" == "--user" -o \
+		       "${prev}" == "--profile" ];then
+			COMPREPLY=()
+			return
+		fi
+
 		case "${COMP_WORDS[1]}" in
-		node)
-			case "${COMP_WORDS[2]}" in
-			run_list)
-				if [ "${cword}" -eq 3 ];then
-					COMPREPLY=( $(compgen -W "add remove set" -- "${cur}"))
-				elif [ "${cword}" -eq 4 ];then
-					COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
-				elif [ "${cword}" -ge 5 ];then
-					COMPREPLY=( $(compgen -W "${__all_site_cookbooks}" -- "${cur}"))
-				fi
-				;;
-			environment)
-				if [ "${cword}" -eq 3 ];then
-					COMPREPLY=( $(compgen -W "set" -- "${cur}"))
-				elif [ "${cword}" -eq 4 -a "${COMP_WORDS[3]}" == "set" ];then
-					COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
-				fi
-				;;
-			show)
-				if [ "${cword}" -eq 3 ];then
-					COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
-				elif [ "${cword}" -eq 4 ];then
-					COMPREPLY=( $(compgen -W "-a --attribute -F --format -l --long -r --run-list" -- "${cur}"))
-				fi
-				;;
-			edit)
-				if [ "${cword}" -eq 3 ];then
-					COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
-				elif [ "${cword}" -eq 4 ];then
-					COMPREPLY=( $(compgen -W "-a --all -e --editor -E --environment -F --format" -- "${cur}"))
-				fi
-				;;
-			delete|status)
-				COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
-				;;
-			esac
+		bootstrap)
+			# knife bootstrap [SSH_USER@]FQDN (options)
+			COMPREPLY=( $(compgen -W "-N --node-name -E --environment -x --ssh-user --sudo --bootstrap-install-command --bootstrap-preinstall-command --bootstrap-proxy" -- "${cur}"))
 			;;
 		client)
 			case "${COMP_WORDS[2]}" in
 			delete|edit|reregister|show)
-				COMPREPLY=( $(compgen -W "${__all_chef_nodes}" -- "${cur}"))
+				__get_chef_clients
+				COMPREPLY=( $(compgen -W "${__chef_clients}" -- "${cur}"))
 				;;
 			esac
 			;;
 		cookbook)
+			__get_chef_cookbooks
 			case "${COMP_WORDS[2]}" in
 			test|upload)
-				COMPREPLY=( $(compgen -W "${__all_site_cookbooks}" -- "${cur}"))
+				COMPREPLY=( $(compgen -W "${__chef_cookbooks}" -- "${cur}"))
+				;;
+			show)
+				# knife cookbook show COOKBOOK [VERSION] [PART] [FILENAME] (options)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "${__chef_cookbooks}" -- "${cur}"))
+				fi
 				;;
 			delete)
+				# knife cookbook delete COOKBOOK VERSION (options)
 				if [ "${cword}" -eq 3 ];then
-					COMPREPLY=( $(compgen -W "${__all_site_cookbooks}" -- "${cur}"))
+					__bookname=""
+					COMPREPLY=( $(compgen -W "${__chef_cookbooks} -h --help" -- "${cur}"))
+				elif [ "${cword}" -eq 4 -a "${COMP_WORDS[3]}" != "-h" -a "${COMP_WORDS[3]}" != "--help" ];then
+					if [ "${__bookname}" != "${COMP_WORDS[3]}" ];then
+						# new or cookbook changed,get cookbook version
+						__ckver=$(knife cookbook list -c ${__chef_conf} -a -F json | tr -d '",' | sed 's/ \+/ /g;s/^ //' | grep "^${COMP_WORDS[3]} " | sed 's/'${COMP_WORDS[3]}' //')
+						__bookname="${COMP_WORDS[3]}"
+					fi
+					COMPREPLY=( $(compgen -W "${__ckver} --all" -- "${cur}"))
+				elif [ "${cword}" -ge 5 ];then
+					COMPREPLY=( $(compgen -W "--all -s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -p --purge -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
 				fi
 				;;
 			download)
 				if [ "${cword}" -eq 3 ];then
-					COMPREPLY=( $(compgen -W "${__all_site_cookbooks}" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__chef_cookbooks}" -- "${cur}"))
 				fi
 				;;
 			esac
 			;;
-		role)
+		data)
+			if [ "${cword}" -eq 2 ];then
+				COMPREPLY=( $(compgen -W "bag" -- "${cur}"))
+			elif [ "${COMP_WORDS[2]}" == "bag" -a "${cword}" -eq 3 ];then
+				COMPREPLY=( $(compgen -W "create delete edit from list show" -- "${cur}"))
+			elif [ "${COMP_WORDS[2]}" == "bag" -a "${cword}" -ge 4 ];then
+				case "${COMP_WORDS[3]}" in
+				create)
+					if [ "${cword}" == 4 ];then
+						COMPREPLY=( )
+					elif [ "${cur:0:1}" == "-" ];then
+						COMPREPLY=( $(compgen -W "--server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults -d --disable-editing -e --editor --encrypt -E --environment --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -s --secret --secret-file -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					fi
+					;;
+				from)
+					COMPREPLY=( $(compgen -W "file" -- "${cur}"))
+					;;
+				list)
+					if [ "${cword}" == 4 ];then
+						COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -p --purge -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					elif [ "${prev}" == "-s" -o "${prev}" == "--server-url" ];then
+						COMPREPLY=( )
+					else
+						COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -p --purge -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					fi
+					;;
+				show)
+					# knife data bag show BAG [ITEM] (options)
+					if [ "${cword}" == 4 ];then
+						__get_chef_databags
+						COMPREPLY=( $(compgen -W "${__chef_databags}" -- "${cur}"))
+					elif [ "${cur:0:1}" == "-" ];then
+						COMPREPLY=( $(compgen -W "--server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -s --secret -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					fi
+					;;
+				esac
+			fi
+			;;
+		node)
 			case "${COMP_WORDS[2]}" in
 			run_list)
 				if [ "${cword}" -eq 3 ];then
-					COMPREPLY=( $(compgen -W "add clear remove replace set" -- "${cur}"))
-				elif [ "${cword}" -ge 5 ];then
-					COMPREPLY=( $(compgen -W "${__all_site_cookbooks}" -- "${cur}"))
+					__node=""
+					COMPREPLY=( $(compgen -W "add remove set" -- "${cur}"))
+				elif [ "${cword}" -eq 4 ];then
+					__node=""
+					__get_chef_nodes
+					COMPREPLY=( $(compgen -W "${__chef_nodes} --help" -- "${cur}"))
+				elif [ "${cword}" -ge 5 -a "${COMP_WORDS[4]}" != "--help" ];then
+					case "${COMP_WORDS[3]}" in
+					add)
+						# knife node run_list add [NODE] [ENTRY [ENTRY]] (options)
+						if [ "${prev}" = "-a" -o "${prev}" = "--after" -o "${prev}" = "-b" -o "${prev}" == "--before" ];then
+							if [ "${COMP_WORDS[4]}" != "${__node}" ];then
+								# new or node changed,get node's run_list
+								__runlist=$(knife node show ${COMP_WORDS[4]} -r -c ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
+								__node=${COMP_WORDS[4]}
+							fi
+							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
+						elif [ "${cur:0:1}" = "-" ];then
+							COMPREPLY=( $(compgen -W "-a --after -b --before -s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults -d --disable-editing -e --editor --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+						else
+							__get_chef_roles
+							__get_chef_recipes
+							COMPREPLY=( $(compgen -P"'" -W "${__chef_roles} ${__chef_recipes}" -- "${cur}"))
+						fi
+						;;
+					set)
+						# knife node run_list set NODE ENTRIES (options)
+						if [ "${cur:0:1}" = "-" ];then
+							COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+						else
+							__get_chef_roles
+							__get_chef_recipes
+							COMPREPLY=( $(compgen -P"'" -W "${__chef_roles} ${__chef_recipes}" -- "${cur}"))
+						fi
+						;;
+					remove)
+						# knife node run_list remove [NODE] [ENTRY [ENTRY]] (options)
+						if [ "${cur:0:1}" = "-" ];then
+							COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults -e --editor --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+						else
+							if [ "${COMP_WORDS[4]}" != "${__node}" ];then
+								# new or node changed,get node's run_list
+								__runlist=$(knife node show ${COMP_WORDS[4]} -r -c ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
+								__node=${COMP_WORDS[4]}
+							fi
+							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
+						fi
+						;;
+					esac
+				fi
+				;;
+			environment)
+				# knife node environment set NODE ENVIRONMENT
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "set" -- "${cur}"))
+				elif [ "${cword}" -eq 4 -a "${COMP_WORDS[3]}" == "set" ];then
+					__get_chef_nodes
+					COMPREPLY=( $(compgen -W "${__chef_nodes} --help" -- "${cur}"))
+				elif [ "${cword}" -eq 5 -a "${COMP_WORDS[3]}" == "set" -a "${COMP_WORDS[4]}" != "--help" ];then
+					__get_chef_environments
+					COMPREPLY=( $(compgen -W "${__chef_environments}" -- "${cur}"))
+				elif [ "${cword}" -ge 6 -a "${COMP_WORDS[3]}" == "set" -a "${COMP_WORDS[4]}" != "--help" ];then
+					if [ "${prev}" == "-s" -o "${prev}" == "--server-url" ];then
+						COMPREPLY=( )
+					else
+						COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					fi
+				fi
+				;;
+			show)
+				# knife node show NODE (options)
+				if [ "${cword}" -eq 3 ];then
+					__get_chef_nodes
+					COMPREPLY=( $(compgen -W "${__chef_nodes} --help" -- "${cur}"))
+				elif [ "${cword}" -ge 4 -a "${COMP_WORDS[3]}" != "--help" ];then
+					if [ "${prev}" == "-a" -o \
+					     "${prev}" == "--attribute" -o \
+					     "${prev}" == "-S" -o \
+					     "${prev}" == "--field-separator" ];then
+						COMPREPLY=()
+					else
+						COMPREPLY=( $(compgen -W "-a --attribute -s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults -E --environment -S --field-separator --no-fips --fips -F --format -z --local-mode -l --long -m --medium -u --user --print-after --profile -r --run-list -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					fi
+				fi
+				;;
+			edit)
+				# knife node edit NODE (options)
+				if [ "${cword}" -eq 3 ];then
+					__get_chef_nodes
+					COMPREPLY=( $(compgen -W "${__chef_nodes} --help" -- "${cur}"))
+				elif [ "${cword}" -ge 4 -a "${COMP_WORDS[3]}" != "--help" ];then
+					COMPREPLY=( $(compgen -W "-a --all -s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -d --disable-editing -e --editor --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+				fi
+				;;
+			delete)
+				# knife node delete [NODE [NODE]] (options)
+				if [ "${cword}" -eq 3 ];then
+					__get_chef_nodes
+					COMPREPLY=( $(compgen -W "${__chef_nodes} --help" -- "${cur}"))
+				elif [ "${cword}" -ge 4 -a "${COMP_WORDS[3]}" != "--help" ];then
+					if [ "${cur:0:1}" = "-" ];then
+						COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					else
+						__get_chef_nodes
+						COMPREPLY=( $(compgen -W "${__chef_nodes}" -- "${cur}"))
+					fi
 				fi
 				;;
 			esac
 			;;
-		ssh)
-			if [ "${cword}" -ge 4 ];then
-				COMPREPLY=( $(compgen -W "-C --concurrency -E --environment -u --user -a --attribute -G --ssh-gateway -i --ssh-identity-file -p --ssh-port -t --ssh-timeout -x --ssh-user --tmux-split" -- "${cur}"))
+		recipe)
+			# knife recipe list [PATTERN]
+			if [ "${cword}" -ge 3 ];then
+				COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
 			fi
+			;;
+		role)
+			case "${COMP_WORDS[2]}" in
+			bulk)
+				# knife role bulk delete REGEX (options)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "delete" -- "${cur}"))
+				elif [ "${cword}" -eq 4 ];then
+					if [ "${cur:0:1}" == "-" ];then
+						COMPREPLY=( $(compgen -W "-h --help" -- "${cur}"))
+					fi
+				elif [ "${cword}" -ge 5 -a "${COMP_WORDS[4]}" != "-h" -a "${COMP_WORDS[4]}" != "--help" ];then
+					COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+				fi
+				;;
+			create)
+				# knife role create ROLE (options)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=()
+				elif [ "${cword}" -ge 4 ];then
+					COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --color --no-color -c --config --config-option --defaults -d --disable-editing -e --editor --fips --no-fips --listen --no-listen -z --local-mode -u --user --print-ater --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+				fi
+				;;
+			delete)
+				# knife role delete ROLE (options)
+				if [ "${cword}" -eq 3 ];then
+					__get_chef_roles_name
+					COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
+				elif [ "${cword}" -eq 4 -a "${COMP_WORDS[3]}" != "-h" -a "${COMP_WORDS[3]}" != "--help" ];then
+					COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --color --no-color -c --config --config-option --defaults --fips --no-fips --listen --no-listen -z --local-mode -u --user --print-ater --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+				elif [ "${cword}" -ge 5 ];then
+					COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --color --no-color -c --config --config-option --defaults --fips --no-fips --listen --no-listen -z --local-mode -u --user --print-ater --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+				fi
+				;;
+			edit)
+				# knife role edit ROLE (options)
+				if [ "${cword}" -eq 3 ];then
+					__get_chef_roles_name
+					COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
+				elif [ "${cword}" -eq 4 ];then
+					COMPREPLY=( $(compgen -W "-s --chef-zero-host --chef-zero-port -k --key --color --no-color -c --config --config-option --defaults -d --disable-editing -e --editor -E --environment --fips --no-fips -F --format --listen --no-listen -z --local-mode -u --user --print-ater --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+				elif [ "${cword}" -ge 5 ];then
+					if [ "${prev}" == "-E" -o "${prev}" == "--environemnt" ];then
+						__get_chef_environments
+						COMPREPLY=( $(compgen -W "${__chef_environments}" -- "${cur}"))
+					else
+						COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --color --no-color -c --config --config-option --defaults -d --disable-editing -e --editor -E --environment --fips --no-fips --listen --no-listen -z --local-mode -u --user --print-ater --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					fi
+				fi
+				;;
+			from)
+				# knife role from file FILE [FILE..] (options)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "file" -- "${cur}"))
+				elif [ "${cword}" -eq 4 ];then
+					compopt -o filenames
+					COMPREPLY=( $(compgen -f -- "${cur}"))
+				elif [ "${cword}" -ge 5 ];then
+					if [ "${cur:0:1}" == "-" ];then
+						COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --color --no-color -c --config --config-option --defaults -d --disable-editing -e --editor --fips --no-fips --listen --no-listen -z --local-mode -u --user --print-ater --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					else
+						compopt -o filenames
+						COMPREPLY=( $(compgen -f -- "${cur}"))
+					fi
+				fi
+				;;
+			run_list)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "add clear remove replace set" -- "${cur}"))
+				elif [ "${cword}" -eq 4 ];then
+					__role=""
+					__get_chef_roles_name
+					COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
+				elif [ "${cword}" -ge 5 -a "${COMP_WORDS[4]}" != "-h" -a "${COMP_WORDS[4]}" != "--help" ];then
+					case "${COMP_WORDS[3]}" in
+					add)
+						# knife role run_list add [ROLE] [ENTRY [ENTRY]] (options)
+						if [ "${prev}" = "-a" -o "${prev}" = "--after" ];then
+							if [ "${COMP_WORDS[4]}" != "${__role}" ];then
+								# new or role changed,get role's run_list
+								__runlist=$(knife role show ${COMP_WORDS[4]} -r -c ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
+								__role=${COMP_WORDS[4]}
+							fi
+							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
+						elif [ "${cur:0:1}" = "-" ];then
+							COMPREPLY=( $(compgen -W "-a --after -s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults -d --disable-editing -e --editor --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+						else
+							__get_chef_recipes
+							COMPREPLY=( $(compgen -P"'" -W "${__chef_recipes}" -- "${cur}"))
+						fi
+						;;
+					clear)
+						# knife role run_list clear [ROLE] (options)
+						if [ "${cword}" -eq 4 ];then
+							__get_chef_roles_name
+							COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
+						elif [ "${cword}" -ge 5 ];then
+							COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+						fi
+						;;
+					remove)
+						# knife role run_list remove [ROLE] [ENTRY] (options)
+						if [ "${cur:0:1}" = "-" ];then
+							COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+						else
+							if [ "${COMP_WORDS[4]}" != "${__role}" ];then
+								# new or role changed,get role's run_list
+								__runlist=$(knife role show ${COMP_WORDS[4]} -c ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
+								__role=${COMP_WORDS[4]}
+							fi
+							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
+						fi
+						;;
+					replace)
+						# knife role run_list replace [ROLE] [OLD_ENTRY] [NEW_ENTRY] (options)
+						if [ "${cword}" -eq 4 ];then
+							__get_chef_roles_name
+							COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
+						elif [ "${cword}" -eq 5 ];then
+							if [ "${COMP_WORDS[4]}" != "${__role}" ];then
+								# new or role changed,get role's run_list
+								__runlist=$(knife role show ${COMP_WORDS[4]} -c ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
+								__role=${COMP_WORDS[4]}
+							fi
+							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
+						elif [ "${cword}" -eq 6 ];then
+							__get_chef_recipes
+							COMPREPLY=( $(compgen -P"'" -W "${__chef_recipes}" -- "${cur}"))
+						else
+							COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+						fi
+						;;
+					esac
+				fi
+				;;
+			show)
+				# knife role show ROLE (options)
+				if [ "${cword}" -eq 3 ];then
+					__get_chef_roles_name
+					COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
+				elif [ "${cword}" -ge 4 -a "${COMP_WORDS[3]}" != "-h" -a "${COMP_WORDS[3]}" != "--help" ];then
+					if [ "${prev}" == "-a" -o \
+					     "${prev}" == "--attribute" ];then
+						COMPREPLY=()
+					else
+						COMPREPLY=( $(compgen -W "-a --attribute -s --server-url --chef-zero-host --chef-zero-port -k --key -c --config --config-option --defaults -d --disable-editing -e --editor -S --field-separator --fips --no-fips -F --format --listen --no-listen -z --local-mode -u --user --print-ater --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					fi
+				fi
+				;;
+			esac
 			;;
 		search)
 			COMPREPLY=( $(compgen -W "-a --attribute -i --id-only -l --long -r --run-list" -- "${cur}"))
 			;;
-		bootstrap)
-			COMPREPLY=( $(compgen -W "-N --node-name -E --environment -x --ssh-user --sudo --bootstrap-install-command --bootstrap-preinstall-command --bootstrap-proxy" -- "${cur}"))
+		ssh)
+			# knife ssh QUERY COMMAND (options)
+			if [ "${cword}" -ge 4 ];then
+				COMPREPLY=( $(compgen -W "-C --concurrency -E --environment -u --user -a --attribute -G --ssh-gateway -i --ssh-identity-file -p --ssh-port -t --ssh-timeout -x --ssh-user --tmux-split" -- "${cur}"))
+			fi
+			;;
+		user)
+			if [ "${COMP_WORDS[2]}" == "key" ];then
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "create delete edit list show" -- "${cur}"))
+				else
+					case "${COMP_WORDS[3]}" in
+					create)
+						;;
+					delete|edit|show)
+						;;
+					list)
+						# knife user key list (options)
+						;;
+					esac
+				fi
+			else
+				case "${COMP_WORDS[2]}" in
+				create)
+					# knife user create USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD (options)
+					COMPREPLY=()
+					;;
+				delete|edit)
+					# knife user edit USER (options)
+					# knife user delete USER (options)
+					__get_chef_users
+					if [ "${cword}" -eq 3 ];then
+						COMPREPLY=( $(compgen -W "${__chef_users} -h --help" -- "${cur}"))
+					else
+						COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version --with-uri -y --yes -h --help" -- "${cur}"))
+					fi
+					;;
+				list)
+					# knife user list (options)
+					COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version --with-uri -y --yes -h --help" -- "${cur}"))
+					;;
+				reregister)
+					# knife user reregister USER (options)
+					__get_chef_users
+					if [ "${cword}" -eq 3 ];then
+						COMPREPLY=( $(compgen -W "${__chef_users} -h --help" -- "${cur}"))
+					else
+						COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults -S --field-separator --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+					fi
+					;;
+				show)
+					# knife user show USER (options)
+					__get_chef_users
+					if [ "${cword}" -eq 3 ];then
+						COMPREPLY=( $(compgen -W "${__chef_users} -h --help" -- "${cur}"))
+					elif [ "${cword}" -ge 4 ];then
+						if [ "${prev}" == "-a" -o \
+						     "${prev}" == "--attribute" -o \
+						     "${prev}" == "-S" -o \
+						     "${prev}" == "--field-separator" ];then
+							COMPREPLY=()
+						else
+							COMPREPLY=( $(compgen -W "-a --attribute -s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults -S --field-separator --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version --with-uri -y --yes -h --help" -- "${cur}"))
+						fi
+					fi
+					;;
+				esac
+			fi
 			;;
 		esac
 	fi
@@ -199,7 +642,14 @@ _have chef && \
 _have knife && \
   complete -F _knife_completion knife
 
-clear_chef_node_cache()
+clear_cache()
 {
-	export __all_chef_nodes=
+	__chef_clients=
+	__chef_nodes=
+	__chef_roles=
+	__chef_roles_name=
+	__chef_recipes=
+	__chef_users=
+	__chef_cookbooks=
+	__chef_environments=
 }

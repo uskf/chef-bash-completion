@@ -13,3 +13,9 @@ $ curl -O https://raw.githubusercontent.com/uskf/chef-bash-completion/master/che
 eval "$(chef shell-init bash)"
 source /path/to/chef-bash-completion
 ```
+
+### Option ###
+
+|Variable|Description|Default|
+|-|-|-|
+|__repodir|chef repository directory name(relative path from home)|chef-repo|
