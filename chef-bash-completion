@@ -208,7 +208,56 @@ _knife_completion()
 		case "${COMP_WORDS[1]}" in
 		bootstrap)
 			# knife bootstrap [SSH_USER@]FQDN (options)
-			COMPREPLY=( $(compgen -W "-N --node-name -E --environment -x --ssh-user --sudo --bootstrap-install-command --bootstrap-preinstall-command --bootstrap-proxy" -- "${cur}"))
+			if [ "${prev}" == "--bootstrap-curl-options" -o \
+			     "${prev}" == "--bootstrap-install-command" -o \
+			     "${prev}" == "--bootstrap-no-proxy" -o \
+			     "${prev}" == "--bootstrap-preinstall-command" -o \
+			     "${prev}" == "--bootstrap-proxy" -o \
+			     "${prev}" == "--bootstrap-proxy-pass" -o \
+			     "${prev}" == "--bootstrap-proxy-user" -o \
+			     "${prev}" == "-t" -o \
+			     "${prev}" == "--bootstrap-template" -o \
+			     "${prev}" == "--bootstrap-url" -o \
+			     "${prev}" == "--bootstrap-vault-item" -o \
+			     "${prev}" == "--bootstrap-vault-json" -o \
+			     "${prev}" == "--bootstrap-version" -o \
+			     "${prev}" == "--bootstrap-wget-options" -o \
+			     "${prev}" == "-N" -o \
+			     "${prev}" == "--node-name" -o \
+			     "${prev}" == "--policy-group" -o \
+			     "${prev}" == "--policy-name" -o \
+			     "${prev}" == "--profile" -o \
+			     "${prev}" == "-r" -o \
+			     "${prev}" == "--run-list" -o \
+			     "${prev}" == "-s" -o \
+			     "${prev}" == "--secret" -o \
+			     "${prev}" == "-G" -o \
+			     "${prev}" == "--ssh-gateway" -o \
+			     "${prev}" == "-P" -o \
+			     "${prev}" == "--ssh-password" -o \
+			     "${prev}" == "-p" -o \
+			     "${prev}" == "--ssh-port" -o \
+			     "${prev}" == "-x" -o \
+			     "${prev}" == "--ssh-user" -o \
+			     "${prev}" == "--tags" ];then
+				COMPREPLY=()
+			elif [ "${prev}" == "-E" -o "${prev}" == "--environment" ];then
+				__get_chef_environments
+				COMPREPLY=( $(compgen -W "${__chef_environments}" -- "${cur}"))
+			elif [ "${prev}" == "--node-ssl-verify-mode" ];then
+				COMPREPLY=( $(compgen -W "peer none" -- "${cur}"))
+			elif [ "${prev}" == "--bootstrap-vault-file" -o \
+			       "${prev}" == "--json-attribute-file" -o \
+			       "${prev}" == "--identity-file" -o \
+			       "${prev}" == "--secret-file" -o \
+			       "${prev}" == "-i" -o \
+			       "${prev}" == "--ssh-gateway-identity" -o \
+			       "${prev}" == "--ssh-identity-file" ];then
+				compopt -o filenames
+				COMPREPLY=( $(compgen -f -- "${cur}"))
+			else
+				COMPREPLY=( $(compgen -W "--bootstrap-curl-options --bootstrap-install-command --bootstrap-no-proxy --bootstrap-preinstall-command --bootstrap-proxy --bootstrap-proxy-pass --bootstrap-proxy-user -t --bootstrap-template --bootstrap-url --bootstrap-vault-file --bootstrap-vault-item --bootstrap-vault-json --bootstrap-version --bootstrap-wget-options -N --node-name -E --environment -j --json-attributes --json-attribute-file -F --format -A --forward-agent --hint --host-key-verify --no-host-key-verify --identity-file --listen --no-listen -z --local-mode -u --user --node-ssl-verify-mode --policy-group --policy-name --prerelease --sudo-preserve-home --print-after --profile -r --run-list -s --secret --secret-file -G --ssh-gateway --ssh-gateway-identity -i --ssh-identity-file -P --ssh-password -p --ssh-port -x --ssh-user --tags --sudo --use-sudo-password -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+			fi
 			;;
 		client)
 			case "${COMP_WORDS[2]}" in
