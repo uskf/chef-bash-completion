@@ -19,9 +19,9 @@ __get_chef_cookbooks()
 	if [ -z "${__chef_cookbooks}" ];then
 		if [ -d ${HOME}/${__repodir}/site-cookbooks/ ];then
 			__chef_cookbooks=$(ls ${HOME}/${__repodir}/site-cookbooks/)
+		else
+			echo "missing site-cookbooks directory"
 		fi
-        else
-          echo "missing site-cookbooks directory"
 	fi
 }
 
