@@ -314,8 +314,24 @@ _knife_completion()
 				;;
 			download)
 				__get_chef_remote_cookbooks
+				options="-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --disable-editing -d --dir -e --editor -E --environment --no-fips --fips -f --force -F --format -N --latest --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help"
 				if [ "${cword}" -eq 3 ];then
+					__bookname=""
 					COMPREPLY=( $(compgen -W "${__chef_remote_cookbooks}" -- "${cur}"))
+				elif [ "${cword}" -eq 4 -a "${COMP_WORDS[3]}" != "-h" -a "${COMP_WORDS[3]}" != "--help" ];then
+					if [ "${__bookname}" != "${COMP_WORDS[3]}" ];then
+						# new or cookbook changed,get cookbook version
+						__ckver=$(knife cookbook list ${__chef_conf} -a -F json | tr -d '",' | sed 's/ \+/ /g;s/^ //' | grep "^${COMP_WORDS[3]} " | sed 's/'${COMP_WORDS[3]}' //')
+						__bookname="${COMP_WORDS[3]}"
+					fi
+					COMPREPLY=( $(compgen -W "${__ckver} ${options}" -- "${cur}"))
+				elif [ "${cword}" -ge 5 ];then
+					if [ "${prev}" == "-d" -o "${prev}" == "--dir" ];then
+						compopt -o filenames
+						COMPREPLY=( $(compgen -d -- "${cur}"))
+					else
+						COMPREPLY=( $(compgen -W "${options}" -- "${cur}"))
+					fi
 				fi
 				;;
 			esac
