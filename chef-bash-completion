@@ -25,6 +25,13 @@ __get_chef_cookbooks()
 	fi
 }
 
+__get_chef_remote_cookbooks()
+{
+	if [ -z "${__chef_remote_cookbooks}" ];then
+		__chef_remote_cookbooks=$(knife cookbook list ${__chef_conf} | awk '{print $1}')
+	fi
+}
+
 __get_chef_nodes()
 {
 	if [ -z "${__chef_nodes}" ];then
@@ -276,22 +283,24 @@ _knife_completion()
 			esac
 			;;
 		cookbook)
-			__get_chef_cookbooks
 			case "${COMP_WORDS[2]}" in
 			test|upload)
+				__get_chef_cookbooks
 				COMPREPLY=( $(compgen -W "${__chef_cookbooks}" -- "${cur}"))
 				;;
 			show)
 				# knife cookbook show COOKBOOK [VERSION] [PART] [FILENAME] (options)
+				__get_chef_remote_cookbooks
 				if [ "${cword}" -eq 3 ];then
-					COMPREPLY=( $(compgen -W "${__chef_cookbooks}" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__chef_remote_cookbooks}" -- "${cur}"))
 				fi
 				;;
 			delete)
 				# knife cookbook delete COOKBOOK VERSION (options)
+				__get_chef_remote_cookbooks
 				if [ "${cword}" -eq 3 ];then
 					__bookname=""
-					COMPREPLY=( $(compgen -W "${__chef_cookbooks} -h --help" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__chef_remote_cookbooks} -h --help" -- "${cur}"))
 				elif [ "${cword}" -eq 4 -a "${COMP_WORDS[3]}" != "-h" -a "${COMP_WORDS[3]}" != "--help" ];then
 					if [ "${__bookname}" != "${COMP_WORDS[3]}" ];then
 						# new or cookbook changed,get cookbook version
@@ -304,8 +313,9 @@ _knife_completion()
 				fi
 				;;
 			download)
+				__get_chef_remote_cookbooks
 				if [ "${cword}" -eq 3 ];then
-					COMPREPLY=( $(compgen -W "${__chef_cookbooks}" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__chef_remote_cookbooks}" -- "${cur}"))
 				fi
 				;;
 			esac
@@ -708,5 +718,6 @@ clear_cache()
 	__chef_recipes=
 	__chef_users=
 	__chef_cookbooks=
+	__chef_remote_cookbooks=
 	__chef_environments=
 }
