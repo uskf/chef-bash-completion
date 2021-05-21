@@ -10,7 +10,7 @@ fi
 __get_chef_recipes()
 {
 	if [ -z "${__chef_recipes}" ];then
-		__chef_recipes=$(knife recipe list -c ${__chef_conf} | while read r;do echo "'recipe[$r]'";done)
+		__chef_recipes=$(knife recipe list ${__chef_conf} | while read r;do echo "'recipe[$r]'";done)
 	fi
 }
 
@@ -28,49 +28,49 @@ __get_chef_cookbooks()
 __get_chef_nodes()
 {
 	if [ -z "${__chef_nodes}" ];then
-		__chef_nodes=$(knife node list -c ${__chef_conf})
+		__chef_nodes=$(knife node list ${__chef_conf})
 	fi
 }
 
 __get_chef_clients()
 {
 	if [ -z "${__chef_clients}" ];then
-		__chef_clients=$(knife client list -c ${__chef_conf})
+		__chef_clients=$(knife client list ${__chef_conf})
 	fi
 }
 
 __get_chef_databags()
 {
 	if [ -z "${__chef_databags}" ];then
-		__chef_databags=$(knife data bag list -c ${__chef_conf})
+		__chef_databags=$(knife data bag list ${__chef_conf})
 	fi
 }
 
 __get_chef_roles()
 {
 	if [ -z "${__chef_roles}" ];then
-		__chef_roles=$(knife role list -c ${__chef_conf} | while read r;do echo "'role[$r]'";done;)
+		__chef_roles=$(knife role list ${__chef_conf} | while read r;do echo "'role[$r]'";done;)
 	fi
 }
 
 __get_chef_roles_name()
 {
 	if [ -z "${__chef_roles_name}" ];then
-		__chef_roles_name=$(knife role list -c ${__chef_conf} | while read r;do echo "$r";done;)
+		__chef_roles_name=$(knife role list ${__chef_conf} | while read r;do echo "$r";done;)
 	fi
 }
 
 __get_chef_environments()
 {
 	if [ -z "${__chef_environments}" ];then
-		__chef_environments=$(knife environment list -c ${__chef_conf})
+		__chef_environments=$(knife environment list ${__chef_conf})
 	fi
 }
 
 __get_chef_users()
 {
 	if [ -z "${__chef_users}" ];then
-		__chef_users=$(knife user list -c ${__chef_conf})
+		__chef_users=$(knife user list ${__chef_conf})
 	fi
 }
 
@@ -135,10 +135,18 @@ _knife_completion()
 	_get_comp_words_by_ref -n : cur prev cword
 
 	if [ -z "${__chef_conf}" ];then
-		if [ -f ${HOME}/${__repodir}/.chef/config.rb ];then
-			__chef_conf="${HOME}/${__repodir}/.chef/config.rb"
+		if [ -f ${HOME}/.chef/credentials ];then
+			__chef_conf=""
+		elif [ -f ${HOME}/.cinc/credentials ];then
+			__chef_conf=""
+		elif [ -f ${HOME}/.chef/config.rb ];then
+			__chef_conf="-c ${HOME}/.chef/config.rb"
+		elif [ -f ${HOME}/.chef/knife.rb ];then
+			__chef_conf="-c ${HOME}/.chef/knife.rb"
+		elif [ -f ${HOME}/${__repodir}/.chef/config.rb ];then
+			__chef_conf="-c ${HOME}/${__repodir}/.chef/config.rb"
 		elif [ -f ${HOME}/${__repodir}/.chef/knife.rb ];then
-			__chef_conf="${HOME}/${__repodir}/.chef/knife.rb"
+			__chef_conf="-c ${HOME}/${__repodir}/.chef/knife.rb"
 		fi
 	fi
 
@@ -287,7 +295,7 @@ _knife_completion()
 				elif [ "${cword}" -eq 4 -a "${COMP_WORDS[3]}" != "-h" -a "${COMP_WORDS[3]}" != "--help" ];then
 					if [ "${__bookname}" != "${COMP_WORDS[3]}" ];then
 						# new or cookbook changed,get cookbook version
-						__ckver=$(knife cookbook list -c ${__chef_conf} -a -F json | tr -d '",' | sed 's/ \+/ /g;s/^ //' | grep "^${COMP_WORDS[3]} " | sed 's/'${COMP_WORDS[3]}' //')
+						__ckver=$(knife cookbook list ${__chef_conf} -a -F json | tr -d '",' | sed 's/ \+/ /g;s/^ //' | grep "^${COMP_WORDS[3]} " | sed 's/'${COMP_WORDS[3]}' //')
 						__bookname="${COMP_WORDS[3]}"
 					fi
 					COMPREPLY=( $(compgen -W "${__ckver} --all" -- "${cur}"))
@@ -357,7 +365,7 @@ _knife_completion()
 						if [ "${prev}" = "-a" -o "${prev}" = "--after" -o "${prev}" = "-b" -o "${prev}" == "--before" ];then
 							if [ "${COMP_WORDS[4]}" != "${__node}" ];then
 								# new or node changed,get node's run_list
-								__runlist=$(knife node show ${COMP_WORDS[4]} -r -c ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
+								__runlist=$(knife node show ${COMP_WORDS[4]} -r ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
 								__node=${COMP_WORDS[4]}
 							fi
 							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
@@ -386,7 +394,7 @@ _knife_completion()
 						else
 							if [ "${COMP_WORDS[4]}" != "${__node}" ];then
 								# new or node changed,get node's run_list
-								__runlist=$(knife node show ${COMP_WORDS[4]} -r -c ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
+								__runlist=$(knife node show ${COMP_WORDS[4]} -r ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
 								__node=${COMP_WORDS[4]}
 							fi
 							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
@@ -539,7 +547,7 @@ _knife_completion()
 						if [ "${prev}" = "-a" -o "${prev}" = "--after" ];then
 							if [ "${COMP_WORDS[4]}" != "${__role}" ];then
 								# new or role changed,get role's run_list
-								__runlist=$(knife role show ${COMP_WORDS[4]} -r -c ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
+								__runlist=$(knife role show ${COMP_WORDS[4]} -r ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
 								__role=${COMP_WORDS[4]}
 							fi
 							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
@@ -566,7 +574,7 @@ _knife_completion()
 						else
 							if [ "${COMP_WORDS[4]}" != "${__role}" ];then
 								# new or role changed,get role's run_list
-								__runlist=$(knife role show ${COMP_WORDS[4]} -c ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
+								__runlist=$(knife role show ${COMP_WORDS[4]} ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
 								__role=${COMP_WORDS[4]}
 							fi
 							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
@@ -580,7 +588,7 @@ _knife_completion()
 						elif [ "${cword}" -eq 5 ];then
 							if [ "${COMP_WORDS[4]}" != "${__role}" ];then
 								# new or role changed,get role's run_list
-								__runlist=$(knife role show ${COMP_WORDS[4]} -c ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
+								__runlist=$(knife role show ${COMP_WORDS[4]} ${__chef_conf} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
 								__role=${COMP_WORDS[4]}
 							fi
 							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
