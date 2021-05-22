@@ -88,11 +88,14 @@ _chef_completion()
 
 	COMPREPLY=()
 	if [ "${cword}" -eq 1 ]; then
-		COMPREPLY=( $(compgen -W "exec env gem generate shell-init install update push push-archive show-policy diff export clean-policy-revisions clean-policy-cookbooks delete-policy-group delete-policy undelete describe-cookbook" -- "${cur}"))
+		COMPREPLY=( $(compgen -W "exec env gem generate shell-init install update push push-archive show-policy diff export clean-policy-revisions clean-policy-cookbooks delete-policy-group delete-policy undelete describe-cookbook report" -- "${cur}"))
 	elif [ "${cword}" -eq 2 ]; then
 		case "${COMP_WORDS[1]}" in
 		generate)
 			COMPREPLY=( $(compgen -W "cookbook recipe attribute template file helpers lwrp resource repo policyfile generator build-cookbook" -- "${cur}"))
+			;;
+		report)
+			COMPREPLY=( $(compgen -W "cookbooks nodes -h --help" -- "${cur}"))
 			;;
 		esac
 	elif [ "${cword}" -ge 3 ]; then
@@ -134,6 +137,37 @@ _chef_completion()
 					;;
 				file|template)
 					COMPREPLY=( $(compgen -W "-C --copyright -m --email -a --generator-arg -h --help -I --license -s --source -v --version -g --generator-cookbook" -- "${cur}"))
+					;;
+				esac
+			fi
+			;;
+		report)
+			if [ "${prev}" == "-s" -o \
+			     "${prev}" == "--chef-server-url" -o \
+			     "${prev}" == "-k" -o \
+			     "${prev}" == "--client-key" -o \
+			     "${prev}" == "-n" -o \
+			     "${prev}" == "--client-name" -o \
+			     "${prev}" == "-F" -o \
+			     "${prev}" == "--node-filter" -o \
+			     "${prev}" == "-p" -o \
+			     "${prev}" == "--profile" -o \
+			     "${prev}" == "-w" -o \
+			     "${prev}" == "--workers" ]; then
+				COMPREPLY=()
+			elif [ "${prev}" == "-c" -o "${prev}" == "--credentials" ]; then
+				compopt -o filenames
+				COMPREPLY=( $(compgen -f -- "${cur}"))
+			elif [ "${prev}" == "-f" -o "${prev}" == "--format" ]; then
+				COMPREPLY=( $(compgen -W "txt csv" -- "${cur}"))
+			else
+				global_flags="-a --anonymize -s --chef-server-url -k --client-key -n --client-name -c --credentials -f --format -F --node-filter -p --profile -o --ssl-no-verify"
+				case "${COMP_WORDS[2]}" in
+				cookbooks)
+					COMPREPLY=( $(compgen -W "-h --help -u --only-unused -V --verify-upgrade -w --workers ${global_flags}" -- "${cur}"))
+					;;
+				nodes)
+					COMPREPLY=( $(compgen -W "-h --help ${global_flags}" -- "${cur}"))
 					;;
 				esac
 			fi
