@@ -88,7 +88,7 @@ _chef_completion()
 
 	COMPREPLY=()
 	if [ "${cword}" -eq 1 ]; then
-		COMPREPLY=( $(compgen -W "exec env gem generate shell-init install update push push-archive show-policy diff provision export clean-policy-revisions clean-policy-cookbooks delete-policy-group delete-policy undelete describe-cookbook" -- "${cur}"))
+		COMPREPLY=( $(compgen -W "exec env gem generate shell-init install update push push-archive show-policy diff export clean-policy-revisions clean-policy-cookbooks delete-policy-group delete-policy undelete describe-cookbook" -- "${cur}"))
 	elif [ "${cword}" -eq 2 ]; then
 		case "${prev}" in
 		generate)
