@@ -88,7 +88,7 @@ _chef_completion()
 
 	COMPREPLY=()
 	if [ "${cword}" -eq 1 ]; then
-		COMPREPLY=( $(compgen -W "exec env gem generate shell-init install update push push-archive show-policy diff export clean-policy-revisions clean-policy-cookbooks delete-policy-group delete-policy undelete describe-cookbook report" -- "${cur}"))
+		COMPREPLY=( $(compgen -W "exec env gem generate shell-init install update push push-archive show-policy diff export clean-policy-revisions clean-policy-cookbooks delete-policy-group delete-policy undelete describe-cookbook report capture" -- "${cur}"))
 	elif [ "${cword}" -eq 2 ]; then
 		case "${COMP_WORDS[1]}" in
 		generate)
@@ -96,6 +96,10 @@ _chef_completion()
 			;;
 		report)
 			COMPREPLY=( $(compgen -W "cookbooks nodes -h --help" -- "${cur}"))
+			;;
+		capture)
+			__get_chef_nodes
+			COMPREPLY=( $(compgen -W "${__chef_nodes} -h --help" -- "${cur}"))
 			;;
 		esac
 	elif [ "${cword}" -ge 3 ]; then
@@ -170,6 +174,23 @@ _chef_completion()
 					COMPREPLY=( $(compgen -W "-h --help ${global_flags}" -- "${cur}"))
 					;;
 				esac
+			fi
+			;;
+		capture)
+			if [ "${prev}" == "-s" -o \
+			     "${prev}" == "--chef-server-url" -o \
+			     "${prev}" == "-k" -o \
+			     "${prev}" == "--client-key" -o \
+			     "${prev}" == "-n" -o \
+			     "${prev}" == "--client-name" -o \
+			     "${prev}" == "-p" -o \
+			     "${prev}" == "--profile" ]; then
+				COMPREPLY=()
+			elif [ "${prev}" == "-c" -o "${prev}" == "--credentials" ]; then
+				compopt -o filenames
+				COMPREPLY=( $(compgen -f -- "${cur}"))
+			else
+				COMPREPLY=( $(compgen -W "-s --chef-server-url -k --client-key -n --client-name -c --credentials -h --help -p --profile -o --ssl-no-verify -d --with-data-bags" -- "${cur}"))
 			fi
 			;;
 		esac
