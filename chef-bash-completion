@@ -90,32 +90,36 @@ _chef_completion()
 	if [ "${cword}" -eq 1 ]; then
 		COMPREPLY=( $(compgen -W "exec env gem generate shell-init install update push push-archive show-policy diff export clean-policy-revisions clean-policy-cookbooks delete-policy-group delete-policy undelete describe-cookbook" -- "${cur}"))
 	elif [ "${cword}" -eq 2 ]; then
-		case "${prev}" in
+		case "${COMP_WORDS[1]}" in
 		generate)
 			COMPREPLY=( $(compgen -W "cookbook recipe attribute template file helpers lwrp resource repo policyfile generator build-cookbook" -- "${cur}"))
 			;;
 		esac
 	elif [ "${cword}" -eq 3 ]; then
-		case "${prev}" in
-		attribute)
-			compopt -o filenames
-			COMPREPLY=( $(compgen -d -- "${cur}"))
-			;;
-		cookbook)
-			compopt -o filenames
-			COMPREPLY=( $(compgen -d -- "${cur}"))
-			;;
-		file)
-			compopt -o filenames
-			COMPREPLY=( $(compgen -d -- "${cur}"))
-			;;
-		recipe)
-			compopt -o filenames
-			COMPREPLY=( $(compgen -d -- "${cur}"))
-			;;
-		template)
-			compopt -o filenames
-			COMPREPLY=( $(compgen -d -- "${cur}"))
+		case "${COMP_WORDS[1]}" in
+		generate)
+			case "${COMP_WORDS[2]}" in
+			attribute)
+				compopt -o filenames
+				COMPREPLY=( $(compgen -d -- "${cur}"))
+				;;
+			cookbook)
+				compopt -o filenames
+				COMPREPLY=( $(compgen -d -- "${cur}"))
+				;;
+			file)
+				compopt -o filenames
+				COMPREPLY=( $(compgen -d -- "${cur}"))
+				;;
+			recipe)
+				compopt -o filenames
+				COMPREPLY=( $(compgen -d -- "${cur}"))
+				;;
+			template)
+				compopt -o filenames
+				COMPREPLY=( $(compgen -d -- "${cur}"))
+				;;
+			esac
 			;;
 		esac
 	elif [ "${cword}" -eq 4 ]; then
@@ -158,11 +162,10 @@ _knife_completion()
 	fi
 
 	COMPREPLY=()
-	if [ "${cword}" -le 2 ]; then
-		case "${prev}" in
-		knife)
-			COMPREPLY=( $(compgen -W "bootstrap client cookbook data environment node recipe role search ssh user" -- "${cur}"))
-			;;
+	if [ "${cword}" -eq 1 ]; then
+		COMPREPLY=( $(compgen -W "bootstrap client cookbook data environment node recipe role search ssh user" -- "${cur}"))
+	elif [ "${cword}" -eq 2 ]; then
+		case "${COMP_WORDS[1]}" in
 		client)
 			COMPREPLY=( $(compgen -W "create delete edit key list reregister show" -- "${cur}"))
 			;;
