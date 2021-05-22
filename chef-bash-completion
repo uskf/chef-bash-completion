@@ -722,6 +722,9 @@ _knife_completion()
 _have chef && \
   complete -F _chef_completion chef
 
+_have cinc && \
+  complete -F _chef_completion cinc
+
 _have knife && \
   complete -F _knife_completion knife
 
