@@ -218,6 +218,18 @@ _knife_completion()
 		fi
 	fi
 
+	if [ -z "${__chef_conf_path}" ]; then
+		if [ -f ${HOME}/.chef/config.rb ];then
+			__chef_conf_path="${HOME}/.chef/config.rb"
+		elif [ -f ${HOME}/.chef/knife.rb ];then
+			__chef_conf_path="${HOME}/.chef/knife.rb"
+		elif [ -f ${HOME}/${__repodir}/.chef/config.rb ];then
+			__chef_conf_path="${HOME}/${__repodir}/.chef/config.rb"
+		elif [ -f ${HOME}/${__repodir}/.chef/knife.rb ];then
+			__chef_conf_path="${HOME}/${__repodir}/.chef/knife.rb"
+		fi
+	fi
+
 	COMPREPLY=()
 	if [ "${cword}" -eq 1 ]; then
 		COMPREPLY=( $(compgen -W "bootstrap client cookbook data environment node recipe role search ssh user" -- "${cur}"))
