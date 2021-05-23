@@ -17,11 +17,26 @@ __get_chef_recipes()
 __get_chef_cookbooks()
 {
 	if [ -z "${__chef_cookbooks}" ];then
-		if [ -d ${HOME}/${__repodir}/site-cookbooks/ ];then
-			__chef_cookbooks=$(ls ${HOME}/${__repodir}/site-cookbooks/)
-		else
-			echo "missing site-cookbooks directory"
+
+		if [ ! -f ${__chef_conf_path} ]; then
+			echo "missing chef configuration file"
+			return
 		fi
+
+		grep -v ^\# ${__chef_conf_path} | grep cookbook_path >/dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			echo "missing cookbook_path in ${__chef_conf_path}"
+			return
+		fi
+
+		grep -v ^\# ${__chef_conf_path} | tr -d "\n" | sed -E 's/\s+//g' | grep 'cookbook_path\[' >/dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			__ckdirs=$(grep -v ^\# ${__chef_conf_path} | tr -d "\n" | sed -E 's/.*cookbook_path\s*\[//;s/\].*//' | tr -d "\"'," )
+		else
+			__ckdirs=$(grep -v ^\# ${__chef_conf_path} | awk '/cookbook_path/{print $2;}' | tr -d "\"'" )
+		fi
+
+		__chef_cookbooks=$(find ${__ckdirs} -mindepth 1 -maxdepth 1 -type d 2>/dev/null | while read i;do basename $i;done)
 	fi
 }
 
