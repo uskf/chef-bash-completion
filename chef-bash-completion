@@ -314,6 +314,7 @@ _knife_completion()
 			     "${prev}" == "--bootstrap-install-command" -o \
 			     "${prev}" == "--bootstrap-no-proxy" -o \
 			     "${prev}" == "--bootstrap-preinstall-command" -o \
+			     "${prev}" == "--bootstrap-product" -o \
 			     "${prev}" == "--bootstrap-proxy" -o \
 			     "${prev}" == "--bootstrap-proxy-pass" -o \
 			     "${prev}" == "--bootstrap-proxy-user" -o \
@@ -324,30 +325,71 @@ _knife_completion()
 			     "${prev}" == "--bootstrap-vault-json" -o \
 			     "${prev}" == "--bootstrap-version" -o \
 			     "${prev}" == "--bootstrap-wget-options" -o \
+			     "${prev}" == "-f" -o \
+			     "${prev}" == "--ca-trust-file" -o \
 			     "${prev}" == "-N" -o \
 			     "${prev}" == "--node-name" -o \
+			     "${prev}" == "-s" -o \
+			     "${prev}" == "--server-url" -o \
+			     "${prev}" == "--chef-zero-host" -o \
+			     "${prev}" == "--chef-zero-port" -o \
+			     "${prev}" == "--secret" -o \
+			     "${prev}" == "--secret-file" -o \
+			     "${prev}" == "-k" -o \
+			     "${prev}" == "--key" -o \
+			     "${prev}" == "--config-option" -o \
+			     "${prev}" == "-P" -o \
+			     "${prev}" == "--connection-password" -o \
+			     "${prev}" == "-p" -o \
+			     "${prev}" == "--connection-port" -o \
+			     "${prev}" == "-U" -o \
+			     "${prev}" == "--connection-user" -o \
+			     "${prev}" == "-e" -o \
+			     "${prev}" == "--editor" -o \
+			     "${prev}" == "-j" -o \
+			     "${prev}" == "--json-attributes" -o \
+			     "${prev}" == "-R" -o \
+			     "${prev}" == "--kerberos-realm" -o \
+			     "${prev}" == "-S" -o \
+			     "${prev}" == "--kerberos-service" -o \
+			     "${prev}" == "-W" -o \
+			     "${prev}" == "--max-wait" -o \
+			     "${prev}" == "-m" -o \
+			     "${prev}" == "--msi-url" -o \
+			     "${prev}" == "-u" -o \
+			     "${prev}" == "--user" -o \
 			     "${prev}" == "--policy-group" -o \
 			     "${prev}" == "--policy-name" -o \
 			     "${prev}" == "--profile" -o \
 			     "${prev}" == "-r" -o \
 			     "${prev}" == "--run-list" -o \
-			     "${prev}" == "-s" -o \
-			     "${prev}" == "--secret" -o \
+			     "${prev}" == "--session-timeout" -o \
 			     "${prev}" == "-G" -o \
 			     "${prev}" == "--ssh-gateway" -o \
-			     "${prev}" == "-P" -o \
+			     "${prev}" == "--su-password" -o \
+			     "${prev}" == "--su-user" -o \
+			     "${prev}" == "--tags" -o \
+			     "${prev}" == "--winrm-ssl-peer-fingerprint" -o \
 			     "${prev}" == "--ssh-password" -o \
-			     "${prev}" == "-p" -o \
 			     "${prev}" == "--ssh-port" -o \
-			     "${prev}" == "-x" -o \
 			     "${prev}" == "--ssh-user" -o \
-			     "${prev}" == "--tags" ];then
+			     "${prev}" == "--ssl-peer-fingerprint" ];then
 				COMPREPLY=()
 			elif [ "${prev}" == "-E" -o "${prev}" == "--environment" ];then
 				__get_chef_environments
 				COMPREPLY=( $(compgen -W "${__chef_environments}" -- "${cur}"))
 			elif [ "${prev}" == "--node-ssl-verify-mode" ];then
 				COMPREPLY=( $(compgen -W "peer none" -- "${cur}"))
+			elif [ "${prev}" == "-o" -o "${prev}" == "--connection-protocol" ];then
+				COMPREPLY=( $(compgen -W "ssh winrm" -- "${cur}"))
+			elif [ "${prev}" == "-F" -o "${prev}" == "--format" ];then
+				COMPREPLY=( $(compgen -W "summary text json yaml pp" -- "${cur}"))
+			elif [ "${prev}" == "--channel" ];then
+				COMPREPLY=( $(compgen -W "stable current unstable" -- "${cur}"))
+			elif [ "${prev}" == "--chef-license" ];then
+				COMPREPLY=( $(compgen -W "accept accept-no-persist accept-silent" -- "${cur}"))
+			elif [ "${prev}" == "-w" -o "${prev}" == "--winrm-auth-method" ];then
+				COMPREPLY=( $(compgen -W "plaintext kerberos ssl negotiate" -- "${cur}"))
 			elif [ "${prev}" == "--bootstrap-vault-file" -o \
 			       "${prev}" == "--json-attribute-file" -o \
 			       "${prev}" == "--identity-file" -o \
@@ -358,7 +400,7 @@ _knife_completion()
 				compopt -o filenames
 				COMPREPLY=( $(compgen -f -- "${cur}"))
 			else
-				COMPREPLY=( $(compgen -W "--bootstrap-curl-options --bootstrap-install-command --bootstrap-no-proxy --bootstrap-preinstall-command --bootstrap-proxy --bootstrap-proxy-pass --bootstrap-proxy-user -t --bootstrap-template --bootstrap-url --bootstrap-vault-file --bootstrap-vault-item --bootstrap-vault-json --bootstrap-version --bootstrap-wget-options -N --node-name -E --environment -j --json-attributes --json-attribute-file -F --format -A --forward-agent --hint --host-key-verify --no-host-key-verify --identity-file --listen --no-listen -z --local-mode -u --user --node-ssl-verify-mode --policy-group --policy-name --prerelease --sudo-preserve-home --print-after --profile -r --run-list -s --secret --secret-file -G --ssh-gateway --ssh-gateway-identity -i --ssh-identity-file -P --ssh-password -p --ssh-port -x --ssh-user --tags --sudo --use-sudo-password -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
+				COMPREPLY=( $(compgen -W "--bootstrap-curl-options --bootstrap-install-command --bootstrap-no-proxy --bootstrap-preinstall-command --bootstrap-product --bootstrap-proxy --bootstrap-proxy-pass --bootstrap-proxy-user -t --bootstrap-template --bootstrap-url --bootstrap-vault-file --bootstrap-vault-item --bootstrap-vault-json --bootstrap-version --bootstrap-wget-options -f --ca-trust-file --channel --chef-license -N --node-name -s --server-url --chef-zero-host --chef-zero-port --secret --secret-file -k --key --no-color --color -c --config --config-option -P --connection-password -p --connection-port -o --connection-protocol -U --connection-user --defaults -d --disable-editing -e --editor --encrypt -E --environment -j --json-attributes --json-attribute-file -F --format --hint -R --kerberos-realm -S --kerberos-service --no-listen --listen -z --local-mode -W --max-wait -m --msi-url -u --user --node-ssl-verify-mode --no-node-verify-api-cert --node-verify-api-cert --policy-group --policy-name --sudo-preserve-home --print-after --profile -r --run-list --session-timeout -A --ssh-forward-agent -G --ssh-gateway --ssh-gateway-identity -i --ssh-identity-file --ssh-verify-host-key --su-password --su-user --tags --sudo --use-sudo-password -V --verbose -v --version -w --winrm-auth-method --winrm-basic-auth-only --winrm-no-verify-cert --winrm-ssl --winrm-ssl-peer-fingerprint -y --yes --forward-agent -h --help --no-host-key-verify --host-key-verify --prerelease --ssh-password --ssh-port --ssh-user --ssl-peer-fingerprint --winrm-authentication-protocol --winrm-password --winrm-port --winrm-session-timeout --winrm-ssl-verify-mode --winrm-transport -x --winrm-user" -- "${cur}"))
 			fi
 			;;
 		client)
