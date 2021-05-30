@@ -106,6 +106,9 @@ _chef_completion()
 		COMPREPLY=( $(compgen -W "exec env gem generate shell-init install update push push-archive show-policy diff export clean-policy-revisions clean-policy-cookbooks delete-policy-group delete-policy undelete describe-cookbook report capture" -- "${cur}"))
 	elif [ "${cword}" -eq 2 ]; then
 		case "${COMP_WORDS[1]}" in
+		gem)
+			COMPREPLY=( $(compgen -W "build cert check cleanup contents dependency environment fetch generate_index help info install list lock mirror open outdated owner pristine push query rdoc search server signin signout sources specification stale uninstall unpack update which yank" -- "${cur}"))
+			;;
 		generate)
 			COMPREPLY=( $(compgen -W "cookbook recipe attribute template file helpers lwrp resource repo policyfile generator build-cookbook" -- "${cur}"))
 			;;
