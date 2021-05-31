@@ -1,4 +1,4 @@
-Bash completion for chef and knife command
+Bash completion for chef, knife, and kitchen command
 ==========================================
 
 ### How to use ###

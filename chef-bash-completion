@@ -96,6 +96,59 @@ __get_chef_users()
 	fi
 }
 
+__get_kitchen_platforms()
+{
+	egrep ^platforms: ${__kitchen_yml} >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		__kitchen_platforms=""
+		return
+	fi
+
+	egrep -A9999 ^platforms: ${__kitchen_yml} | egrep -v ^platforms: | egrep ^[a-z]+: >/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		__next=$( egrep -A9999 ^platforms: ${__kitchen_yml} | egrep -v ^platforms: | egrep ^[a-z]+: | head -1 )
+		__kitchen_platforms=$(egrep -A9999 ^platforms: ${__kitchen_yml} | egrep -v ^platforms: | egrep -B9999 ^${__next} | egrep -- "^\s+- name:" | awk '{print $3}')
+	else
+		__kitchen_platforms=$(egrep -A9999 ^platforms: ${__kitchen_yml} | egrep -v ^platforms: | egrep -- "^\s+- name:" | awk '{print $3}')
+	fi
+}
+
+__get_kitchen_suites()
+{
+	egrep ^suites: ${__kitchen_yml} >/dev/null 2>&1
+	if [ $? -ne 0 ]; then
+		__kitchen_suites=""
+		return
+	fi
+
+	egrep -A9999 ^suites: ${__kitchen_yml} | egrep -v ^suites: | egrep ^[a-z]+: >/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		__next=$( egrep -A9999 ^suites: ${__kitchen_yml} | egrep -v ^suites: | egrep ^[a-z]+: | head -1 )
+		__kitchen_suites=$(egrep -A9999 ^suites: ${__kitchen_yml} | egrep -v ^suites: | egrep -B9999 ^${__next} | egrep -- "^\s+- name:" | awk '{print $3}')
+	else
+		__kitchen_suites=$(egrep -A9999 ^suites: ${__kitchen_yml} | egrep -v ^suites: | egrep -- "^\s+- name:" | awk '{print $3}')
+	fi
+}
+
+__get_kitchen_instances()
+{
+	if [ "${__kitchen_yml}" == "" ]; then
+		return
+	fi
+	__get_kitchen_suites
+	__get_kitchen_platforms
+	__kitchen_instances=""
+	if [ "${__kitchen_suites}" != "" -a "${__kitchen_platforms}" != "" ]; then
+		for s in ${__kitchen_suites}
+		do
+			for p in ${__kitchen_platforms}
+			do
+				__kitchen_instances="${__kitchen_instances} ${s}-${p}"
+			done
+		done
+	fi
+}
+
 _chef_completion()
 {
 	local cur prev cword
@@ -851,6 +904,39 @@ _knife_completion()
 		esac
 	fi
 }
+
+_kitchen_completion()
+{
+	local cur prev cword
+	_get_comp_words_by_ref -n : cur prev cword
+
+	COMPREPLY=()
+	__kitchen_instances=""
+
+	if [ -f "kitchen.yml" ]; then
+		__kitchen_yml="kitchen.yml"
+	elif [ -f ".kitchen.yml" ]; then
+		__kitchen_yml=".kitchen.yml"
+	else
+		__kitchen_yml=""
+	fi
+
+	if [ "${cword}" -eq 1 ]; then
+		COMPREPLY=( $(compgen -W "console converge create destroy diagnose doctor exec help init list login package setup test verify version" -- "${cur}"))
+	elif [ "${cword}" -eq 2 ]; then
+		case "${COMP_WORDS[1]}" in
+		converge|create|destroy|diagnose|list|setup|test|verify)
+			__get_kitchen_instances
+			COMPREPLY=( $(compgen -W "${__kitchen_instances} all" -- "${cur}"))
+			;;
+		doctor|login|package)
+			__get_kitchen_instances
+			COMPREPLY=( $(compgen -W "${__kitchen_instances}" -- "${cur}"))
+			;;
+		esac
+	fi
+}
+
 _have chef && \
   complete -F _chef_completion chef
 
@@ -859,6 +945,9 @@ _have cinc && \
 
 _have knife && \
   complete -F _knife_completion knife
+
+_have kitchen && \
+  complete -F _kitchen_completion kitchen
 
 clear_cache()
 {
