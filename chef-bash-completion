@@ -913,6 +913,12 @@ _kitchen_completion()
 	COMPREPLY=()
 	__kitchen_instances=""
 
+	__ktopt1="-c --concurrency"
+	__ktopt2="-f --fail-fast --no-fail-fast"
+	__ktopt3="-t --test-base-path"
+	__ktopt4="-l --log-level --log-overwrite --no-log-overwrite --color --no-color"
+	__ktopt5="-D --debug --no-debug"
+
 	if [ -f "kitchen.yml" ]; then
 		__kitchen_yml="kitchen.yml"
 	elif [ -f ".kitchen.yml" ]; then
@@ -929,11 +935,63 @@ _kitchen_completion()
 			__get_kitchen_instances
 			COMPREPLY=( $(compgen -W "${__kitchen_instances} all" -- "${cur}"))
 			;;
-		doctor|login|package)
+		doctor|exec|login|package)
 			__get_kitchen_instances
 			COMPREPLY=( $(compgen -W "${__kitchen_instances}" -- "${cur}"))
 			;;
+		help)
+			COMPREPLY=( $(compgen -W "console converge create destroy diagnose doctor exec init list login package setup test verify version" -- "${cur}"))
+			;;
 		esac
+	elif [ "${cword}" -ge 3 ]; then
+		if [ "${prev}" == "-c" -o \
+		     "${prev}" == "--concurrency" -o \
+		     "${prev}" == "--command" ]; then
+			COMPREPLY=()
+		elif [ "${prev}" == "-t" -o \
+		       "${prev}" == "--test-base-path" ]; then
+			compopt -o filenames
+			COMPREPLY=( $(compgen -d -- "${cur}"))
+		elif [ "${prev}" == "-l" -o \
+		       "${prev}" == "--log-level" ]; then
+			COMPREPLY=( $(compgen -W "debug info warn error fatal" -- "${cur}"))
+		elif [ "${COMP_WORDS[1]}" == "test" -a "${prev}" == "-d" -o "${prev}" == "--destroy" ]; then
+			COMPREPLY=( $(compgen -W "passing always never" -- "${cur}"))
+		else
+
+			case "${COMP_WORDS[1]}" in
+			converge)
+				COMPREPLY=( $(compgen -W "${__ktopt1} ${__ktopt2} ${__ktopt3} ${__ktopt4} ${__ktopt5}" -- "${cur}"))
+				;;
+			create|destroy|setup)
+				COMPREPLY=( $(compgen -W "${__ktopt1} ${__ktopt2} ${__ktopt3} ${__ktopt4} " -- "${cur}"))
+				;;
+			diagnose)
+				COMPREPLY=( $(compgen -W "${__ktopt3} ${__ktopt4} --loader --no-loader --plugins --no-plugins --instances --no-instances --all --no-all" -- "${cur}"))
+				;;
+			doctor)
+				COMPREPLY=( $(compgen -W "${__ktopt4} -a --all" -- "${cur}"))
+				;;
+			exec)
+				COMPREPLY=( $(compgen -W "${__ktopt4} -c --command" -- "${cur}"))
+				;;
+			init)
+				COMPREPLY=( $(compgen -W "-D --driver -P --provisioner --create-gemfile --no-create-gemfile" -- "${cur}"))
+				;;
+			list)
+				COMPREPLY=( $(compgen -W "${__ktopt4} ${__ktopt5} -b --bare --no-bare -j --json --no-json" -- "${cur}"))
+				;;
+			login|package)
+				COMPREPLY=( $(compgen -W "${__ktopt4}" -- "${cur}"))
+				;;
+			test)
+				COMPREPLY=( $(compgen -W "${__ktopt1} ${__ktopt3} ${__ktopt4} ${__ktopt5} --auto-init --no-auto-init -d --destroy" -- "${cur}"))
+				;;
+			verify)
+				COMPREPLY=( $(compgen -W "${__ktopt1} ${__ktopt2} ${__ktopt3} ${__ktopt4} ${__ktopt5}" -- "${cur}"))
+				;;
+			esac
+		fi
 	fi
 }
 
