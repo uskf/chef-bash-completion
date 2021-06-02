@@ -31,7 +31,7 @@ __get_chef_cookbooks()
 
 		grep -v ^\# ${__chef_conf_path} | tr -d "\n" | sed -E 's/\s+//g' | grep 'cookbook_path\[' >/dev/null 2>&1
 		if [ $? -eq 0 ]; then
-			__ckdirs=$(grep -v ^\# ${__chef_conf_path} | tr -d "\n" | sed -E 's/.*cookbook_path\s*\[//;s/\].*//' | tr -d "\"'," )
+			__ckdirs=$(grep -v ^\# ${__chef_conf_path} | tr -d "\n" | sed -E 's/.*cookbook_path\s*\[//;s/\].*//' | tr -d "\"'" | sed 's/,/ /g')
 		else
 			__ckdirs=$(grep -v ^\# ${__chef_conf_path} | awk '/cookbook_path/{print $2;}' | tr -d "\"'" )
 		fi
