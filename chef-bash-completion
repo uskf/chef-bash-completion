@@ -306,7 +306,7 @@ _knife_completion()
         __knop_con="--defaults -y --yes -e --editor -d --disable-editing"
         __knop_cnf="-c --config --config-option"
         __knop_env="-E --environment"
-        __knop_prt="-F --format --print-after -V --verbose -h --help"
+        __knop_prt="--no-color --color -F --format --print-after -V --verbose -v --version -h --help"
 
 	if [ "${cword}" -eq 1 ]; then
 		COMPREPLY=( $(compgen -W "bootstrap client cookbook data environment node recipe role search ssh user" -- "${cur}"))
@@ -691,7 +691,7 @@ _knife_completion()
 					COMPREPLY=( $(compgen -W "${__chef_nodes} -h --help" -- "${cur}"))
 				elif [ "${cword}" -ge 4 -a "${COMP_WORDS[3]}" != "--help" ];then
 					__get_chef_nodes
-					COMPREPLY=( $(compgen -W "${__knop_srv} --no-color --color ${__knop_cnf} ${__knop_con} ${__knop_prt} -v --version ${__chef_nodes}" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_con} ${__knop_prt} ${__chef_nodes}" -- "${cur}"))
 				fi
 				;;
 			esac
@@ -889,12 +889,12 @@ _knife_completion()
 					if [ "${cword}" -eq 3 ];then
 						COMPREPLY=( $(compgen -W "${__chef_users} -h --help" -- "${cur}"))
 					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} --no-color --color ${__knop_cnf} --defaults ${__knop_prt} -v --version --with-uri -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} --defaults ${__knop_prt} --with-uri -y --yes" -- "${cur}"))
 					fi
 					;;
 				list)
 					# knife user list (options)
-					COMPREPLY=( $(compgen -W "${__knop_srv} --no-color --color ${__knop_cnf} --defaults ${__knop_prt} -v --version --with-uri -y --yes" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} --defaults ${__knop_prt} --with-uri -y --yes" -- "${cur}"))
 					;;
 				reregister)
 					# knife user reregister USER (options)
@@ -902,7 +902,7 @@ _knife_completion()
 					if [ "${cword}" -eq 3 ];then
 						COMPREPLY=( $(compgen -W "${__chef_users} -h --help" -- "${cur}"))
 					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} --no-color --color ${__knop_cnf} --defaults -S --field-separator ${__knop_prt} -v --version -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} --defaults -S --field-separator ${__knop_prt} -y --yes" -- "${cur}"))
 					fi
 					;;
 				show)
@@ -917,7 +917,7 @@ _knife_completion()
 						     "${prev}" == "--field-separator" ];then
 							COMPREPLY=()
 						else
-							COMPREPLY=( $(compgen -W "-a --attribute ${__knop_srv} --no-color --color ${__knop_cnf} --defaults -S --field-separator ${__knop_prt} -v --version --with-uri -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "-a --attribute ${__knop_srv} ${__knop_cnf} --defaults -S --field-separator ${__knop_prt} --with-uri -y --yes" -- "${cur}"))
 						fi
 					fi
 					;;
