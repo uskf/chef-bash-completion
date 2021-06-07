@@ -302,8 +302,8 @@ _knife_completion()
 	fi
 
 	COMPREPLY=()
-        __knop_srv="-s --server-url --chef-zero-host --chef-zero-port -k --key -z --local-mode -u --user --profile --no-listen --listen"
-        __knop_con="--defaults -y --yes -e --editor"
+        __knop_srv="-s --server-url --chef-zero-host --chef-zero-port -k --key -z --local-mode -u --user --profile --no-listen --listen --no-fips --fips"
+        __knop_con="--defaults -y --yes -e --editor -d --disable-editing"
         __knop_cnf="-c --config --config-option"
         __knop_env="-E --environment"
         __knop_prt="-F --format --print-after -V --verbose -h --help"
@@ -473,15 +473,23 @@ _knife_completion()
 					COMPREPLY=( $(compgen -W "${__chef_clients} -h --help" -- "${cur}"))
 				else
 					__get_chef_clients
-					COMPREPLY=( $(compgen -W "${__chef_clients} ${__knop_srv} ${__knop_con} ${__knop_cnf} ${__knop_env} ${__knop_prt}" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__chef_clients} ${__knop_srv} ${__knop_con} ${__knop_cnf} ${__knop_env} ${__knop_prt} -D --delete-validators" -- "${cur}"))
 				fi
 				;;
-			edit|reregister|show)
+			edit|reregister)
 				if [ "${cword}" -eq 3 ]; then
 					__get_chef_clients
 					COMPREPLY=( $(compgen -W "${__chef_clients} -h --help" -- "${cur}"))
 				else
 					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_con} ${__knop_cnf} ${__knop_env} ${__knop_prt}" -- "${cur}"))
+				fi
+				;;
+			show)
+				if [ "${cword}" -eq 3 ]; then
+					__get_chef_clients
+					COMPREPLY=( $(compgen -W "${__chef_clients} -h --help" -- "${cur}"))
+				else
+					COMPREPLY=( $(compgen -W "-a --attribute -d --disable-editing -S --field-separator ${__knop_srv} ${__knop_con} ${__knop_cnf} ${__knop_env} ${__knop_prt}" -- "${cur}"))
 				fi
 				;;
 			esac
@@ -680,7 +688,7 @@ _knife_completion()
 				# knife node delete [NODE [NODE]] (options)
 				if [ "${cword}" -eq 3 ];then
 					__get_chef_nodes
-					COMPREPLY=( $(compgen -W "${__chef_nodes} --help" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__chef_nodes} -h --help" -- "${cur}"))
 				elif [ "${cword}" -ge 4 -a "${COMP_WORDS[3]}" != "--help" ];then
 					if [ "${cur:0:1}" = "-" ];then
 						COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
