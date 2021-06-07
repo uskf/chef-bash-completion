@@ -690,12 +690,8 @@ _knife_completion()
 					__get_chef_nodes
 					COMPREPLY=( $(compgen -W "${__chef_nodes} -h --help" -- "${cur}"))
 				elif [ "${cword}" -ge 4 -a "${COMP_WORDS[3]}" != "--help" ];then
-					if [ "${cur:0:1}" = "-" ];then
-						COMPREPLY=( $(compgen -W "-s --server-url --chef-zero-host --chef-zero-port -k --key --no-color --color -c --config --config-option --defaults --no-fips --fips -F --format --no-listen --listen -z --local-mode -u --user --print-after --profile -V --verbose -v --version -y --yes -h --help" -- "${cur}"))
-					else
-						__get_chef_nodes
-						COMPREPLY=( $(compgen -W "${__chef_nodes}" -- "${cur}"))
-					fi
+					__get_chef_nodes
+					COMPREPLY=( $(compgen -W "${__knop_srv} --no-color --color ${__knop_cnf} ${__knop_con} ${__knop_prt} -v --version ${__chef_nodes}" -- "${cur}"))
 				fi
 				;;
 			esac
