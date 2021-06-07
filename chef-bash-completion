@@ -302,6 +302,12 @@ _knife_completion()
 	fi
 
 	COMPREPLY=()
+        __knop_srv="-s --server-url --chef-zero-host --chef-zero-port -k --key -z --local-mode -u --user --profile --no-listen --listen"
+        __knop_con="--defaults -y --yes -e --editor"
+        __knop_cnf="-c --config --config-option"
+        __knop_env="-E --environment"
+        __knop_prt="-F --format --print-after -V --verbose -h --help"
+
 	if [ "${cword}" -eq 1 ]; then
 		COMPREPLY=( $(compgen -W "bootstrap client cookbook data environment node recipe role search ssh user" -- "${cur}"))
 	elif [ "${cword}" -eq 2 ]; then
@@ -461,9 +467,22 @@ _knife_completion()
 			;;
 		client)
 			case "${COMP_WORDS[2]}" in
-			delete|edit|reregister|show)
-				__get_chef_clients
-				COMPREPLY=( $(compgen -W "${__chef_clients}" -- "${cur}"))
+			delete)
+				if [ "${cword}" -eq 3 ]; then
+					__get_chef_clients
+					COMPREPLY=( $(compgen -W "${__chef_clients} -h --help" -- "${cur}"))
+				else
+					__get_chef_clients
+					COMPREPLY=( $(compgen -W "${__chef_clients} ${__knop_srv} ${__knop_con} ${__knop_cnf} ${__knop_env} ${__knop_prt}" -- "${cur}"))
+				fi
+				;;
+			edit|reregister|show)
+				if [ "${cword}" -eq 3 ]; then
+					__get_chef_clients
+					COMPREPLY=( $(compgen -W "${__chef_clients} -h --help" -- "${cur}"))
+				else
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_con} ${__knop_cnf} ${__knop_env} ${__knop_prt}" -- "${cur}"))
+				fi
 				;;
 			esac
 			;;
