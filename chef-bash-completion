@@ -309,7 +309,7 @@ _knife_completion()
         __knop_prt="--no-color --color -F --format --print-after -V --verbose -v --version -h --help"
 
 	if [ "${cword}" -eq 1 ]; then
-		COMPREPLY=( $(compgen -W "bootstrap client cookbook data environment node recipe role search ssh user" -- "${cur}"))
+		COMPREPLY=( $(compgen -W "bootstrap client cookbook data environment node recipe role search ssh status user" -- "${cur}"))
 	elif [ "${cword}" -eq 2 ]; then
 		case "${COMP_WORDS[1]}" in
 		client)
@@ -339,6 +339,13 @@ _knife_completion()
 			__get_chef_nodes
 			__prefixed_nodes=$(for n in ${__chef_nodes};do echo "name:$n";done)
 			if [ "${cur:0:2}" == '"n' ];then
+				COMPREPLY=( $(compgen -P'"' -W "${__prefixed_nodes}" -- "${cur}"))
+			fi
+			;;
+		status)
+			if [ "${cur:0:2}" == '"n' ]; then
+				__get_chef_nodes
+				__prefixed_nodes=$(for n in ${__chef_nodes};do echo "name:$n";done)
 				COMPREPLY=( $(compgen -P'"' -W "${__prefixed_nodes}" -- "${cur}"))
 			fi
 			;;
@@ -868,6 +875,10 @@ _knife_completion()
 			if [ "${cword}" -ge 4 ];then
 				COMPREPLY=( $(compgen -W "-C --concurrency -E --environment -u --user -a --attribute -G --ssh-gateway -i --ssh-identity-file -p --ssh-port -t --ssh-timeout -x --ssh-user --tmux-split" -- "${cur}"))
 			fi
+			;;
+		status)
+			# knife status QUERY (options)
+			COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} -l --long -m --medium -r --run-list --sort-reverse" -- "${cur}"))
 			;;
 		user)
 			if [ "${COMP_WORDS[2]}" == "key" ];then
