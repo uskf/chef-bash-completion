@@ -462,7 +462,7 @@ _knife_completion()
 				compopt -o filenames
 				COMPREPLY=( $(compgen -f -- "${cur}"))
 			else
-				COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con} ${__knop_env} --bootstrap-curl-options --bootstrap-install-command --bootstrap-no-proxy --bootstrap-preinstall-command --bootstrap-product --bootstrap-proxy --bootstrap-proxy-pass --bootstrap-proxy-user -t --bootstrap-template --bootstrap-url --bootstrap-vault-file --bootstrap-vault-item --bootstrap-vault-json --bootstrap-version --bootstrap-wget-options -f --ca-trust-file --channel --chef-license -N --node-name --secret --secret-file --no-color --color -P --connection-password -p --connection-port -o --connection-protocol -U --connection-user --encrypt -j --json-attributes --json-attribute-file --hint -R --kerberos-realm -S --kerberos-service -W --max-wait -m --msi-url --node-ssl-verify-mode --no-node-verify-api-cert --node-verify-api-cert --policy-group --policy-name --sudo-preserve-home -r --run-list --session-timeout -A --ssh-forward-agent -G --ssh-gateway --ssh-gateway-identity -i --ssh-identity-file --ssh-verify-host-key --su-password --su-user --tags --sudo --use-sudo-password -v --version -w --winrm-auth-method --winrm-basic-auth-only --winrm-no-verify-cert --winrm-ssl --winrm-ssl-peer-fingerprint --forward-agent --no-host-key-verify --host-key-verify --prerelease --ssh-password --ssh-port --ssh-user --ssl-peer-fingerprint --winrm-authentication-protocol --winrm-password --winrm-port --winrm-session-timeout --winrm-ssl-verify-mode --winrm-transport -x --winrm-user" -- "${cur}"))
+				COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con} ${__knop_env} --bootstrap-curl-options --bootstrap-install-command --bootstrap-no-proxy --bootstrap-preinstall-command --bootstrap-product --bootstrap-proxy --bootstrap-proxy-pass --bootstrap-proxy-user -t --bootstrap-template --bootstrap-url --bootstrap-vault-file --bootstrap-vault-item --bootstrap-vault-json --bootstrap-version --bootstrap-wget-options -f --ca-trust-file --channel --chef-license -N --node-name --secret --secret-file -P --connection-password -p --connection-port -o --connection-protocol -U --connection-user --encrypt -j --json-attributes --json-attribute-file --hint -R --kerberos-realm -S --kerberos-service -W --max-wait -m --msi-url --node-ssl-verify-mode --no-node-verify-api-cert --node-verify-api-cert --policy-group --policy-name --sudo-preserve-home -r --run-list --session-timeout -A --ssh-forward-agent -G --ssh-gateway --ssh-gateway-identity -i --ssh-identity-file --ssh-verify-host-key --su-password --su-user --tags --sudo --use-sudo-password -w --winrm-auth-method --winrm-basic-auth-only --winrm-no-verify-cert --winrm-ssl --winrm-ssl-peer-fingerprint --forward-agent --no-host-key-verify --host-key-verify --prerelease --ssh-password --ssh-port --ssh-user --ssl-peer-fingerprint --winrm-authentication-protocol --winrm-password --winrm-port --winrm-session-timeout --winrm-ssl-verify-mode --winrm-transport -x --winrm-user" -- "${cur}"))
 			fi
 			;;
 		client)
@@ -521,7 +521,7 @@ _knife_completion()
 					fi
 					COMPREPLY=( $(compgen -W "${__ckver} --all" -- "${cur}"))
 				elif [ "${cword}" -ge 5 ];then
-					COMPREPLY=( $(compgen -W "--all ${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color --defaults -p --purge -v --version -y --yes" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "--all ${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -p --purge -y --yes" -- "${cur}"))
 				fi
 				;;
 			download)
@@ -535,13 +535,13 @@ _knife_completion()
 						__ckver=$(knife cookbook list ${__chef_credential} -a -F json | tr -d '",' | sed 's/ \+/ /g;s/^ //' | grep "^${COMP_WORDS[3]} " | sed 's/'${COMP_WORDS[3]}' //')
 						__bookname="${COMP_WORDS[3]}"
 					fi
-					COMPREPLY=( $(compgen -W "${__ckver} ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --dir -f --force -N --latest -v --version" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__ckver} ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --dir -f --force -N --latest" -- "${cur}"))
 				elif [ "${cword}" -ge 5 ];then
 					if [ "${prev}" == "-d" -o "${prev}" == "--dir" ];then
 						compopt -o filenames
 						COMPREPLY=( $(compgen -d -- "${cur}"))
 					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --dir -f --force -N --latest -v --version" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --dir -f --force -N --latest" -- "${cur}"))
 					fi
 				fi
 				;;
@@ -558,7 +558,7 @@ _knife_completion()
 					if [ "${cword}" == 4 ];then
 						COMPREPLY=( )
 					elif [ "${cur:0:1}" == "-" ];then
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --no-color --color --encrypt --secret --secret-file -v --version" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --encrypt --secret --secret-file" -- "${cur}"))
 					fi
 					;;
 				from)
@@ -566,11 +566,11 @@ _knife_completion()
 					;;
 				list)
 					if [ "${cword}" == 4 ];then
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color --defaults -p --purge -v --version -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -p --purge -y --yes" -- "${cur}"))
 					elif [ "${prev}" == "-s" -o "${prev}" == "--server-url" ];then
 						COMPREPLY=( )
 					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color --defaults -p --purge -v --version -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -p --purge -y --yes" -- "${cur}"))
 					fi
 					;;
 				show)
@@ -579,7 +579,7 @@ _knife_completion()
 						__get_chef_databags
 						COMPREPLY=( $(compgen -W "${__chef_databags}" -- "${cur}"))
 					elif [ "${cur:0:1}" == "-" ];then
-						COMPREPLY=( $(compgen -W "${__knop_srv} --no-color --color ${__knop_cnf} --defaults ${__knop_prt} --secret -v --version -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} --defaults ${__knop_prt} --secret -y --yes" -- "${cur}"))
 					fi
 					;;
 				esac
@@ -607,7 +607,7 @@ _knife_completion()
 							fi
 							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
 						elif [ "${cur:0:1}" = "-" ];then
-							COMPREPLY=( $(compgen -W "-a --after -b --before ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con} --no-color --color -v --version" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "-a --after -b --before ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con}" -- "${cur}"))
 						else
 							__get_chef_roles
 							__get_chef_recipes
@@ -617,7 +617,7 @@ _knife_completion()
 					set)
 						# knife node run_list set NODE ENTRIES (options)
 						if [ "${cur:0:1}" = "-" ];then
-							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color --defaults -v --version -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
 						else
 							__get_chef_roles
 							__get_chef_recipes
@@ -627,7 +627,7 @@ _knife_completion()
 					remove)
 						# knife node run_list remove [NODE] [ENTRY [ENTRY]] (options)
 						if [ "${cur:0:1}" = "-" ];then
-							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color  --defaults -e --editor -v --version -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -e --editor -y --yes" -- "${cur}"))
 						else
 							if [ "${COMP_WORDS[4]}" != "${__node}" ];then
 								# new or node changed,get node's run_list
@@ -654,7 +654,7 @@ _knife_completion()
 					if [ "${prev}" == "-s" -o "${prev}" == "--server-url" ];then
 						COMPREPLY=( )
 					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color --defaults -v --version -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
 					fi
 				fi
 				;;
@@ -670,7 +670,7 @@ _knife_completion()
 					     "${prev}" == "--field-separator" ];then
 						COMPREPLY=()
 					else
-						COMPREPLY=( $(compgen -W "-a --attribute ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} --no-color --color --defaults -S --field-separator -l --long -m --medium -r --run-list -v --version -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "-a --attribute ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} --defaults -S --field-separator -l --long -m --medium -r --run-list -y --yes" -- "${cur}"))
 					fi
 				fi
 				;;
@@ -680,7 +680,7 @@ _knife_completion()
 					__get_chef_nodes
 					COMPREPLY=( $(compgen -W "${__chef_nodes} --help" -- "${cur}"))
 				elif [ "${cword}" -ge 4 -a "${COMP_WORDS[3]}" != "--help" ];then
-					COMPREPLY=( $(compgen -W "-a --all ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con} --no-color --color -v --version" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "-a --all ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con}" -- "${cur}"))
 				fi
 				;;
 			delete)
@@ -698,7 +698,7 @@ _knife_completion()
 		recipe)
 			# knife recipe list [PATTERN]
 			if [ "${cword}" -ge 3 ];then
-				COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color --defaults -v --version -y --yes" -- "${cur}"))
+				COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
 			fi
 			;;
 		role)
@@ -712,7 +712,7 @@ _knife_completion()
 						COMPREPLY=( $(compgen -W "-h --help" -- "${cur}"))
 					fi
 				elif [ "${cword}" -ge 5 -a "${COMP_WORDS[4]}" != "-h" -a "${COMP_WORDS[4]}" != "--help" ];then
-					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color --defaults -v --version -y --yes" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
 				fi
 				;;
 			create)
@@ -720,7 +720,7 @@ _knife_completion()
 				if [ "${cword}" -eq 3 ];then
 					COMPREPLY=()
 				elif [ "${cword}" -ge 4 ];then
-					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --color --no-color --defaults -d --disable-editing -e --editor -v --version -y --yes" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -d --disable-editing -e --editor -y --yes" -- "${cur}"))
 				fi
 				;;
 			delete)
@@ -729,9 +729,9 @@ _knife_completion()
 					__get_chef_roles_name
 					COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
 				elif [ "${cword}" -eq 4 -a "${COMP_WORDS[3]}" != "-h" -a "${COMP_WORDS[3]}" != "--help" ];then
-					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --color --no-color --defaults -v --version -y --yes" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
 				elif [ "${cword}" -ge 5 ];then
-					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --color --no-color --defaults -v --version -y --yes" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
 				fi
 				;;
 			edit)
@@ -740,13 +740,13 @@ _knife_completion()
 					__get_chef_roles_name
 					COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
 				elif [ "${cword}" -eq 4 ];then
-					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_con} ${__knop_cnf} ${__knop_env} ${__knop_prt} --color --no-color -v --version" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_con} ${__knop_cnf} ${__knop_env} ${__knop_prt}" -- "${cur}"))
 				elif [ "${cword}" -ge 5 ];then
 					if [ "${prev}" == "-E" -o "${prev}" == "--environemnt" ];then
 						__get_chef_environments
 						COMPREPLY=( $(compgen -W "${__chef_environments}" -- "${cur}"))
 					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_con} ${__knop_cnf} ${__knop_env} ${__knop_prt} --color --no-color -v --version" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_con} ${__knop_cnf} ${__knop_env} ${__knop_prt}" -- "${cur}"))
 					fi
 				fi
 				;;
@@ -759,7 +759,7 @@ _knife_completion()
 					COMPREPLY=( $(compgen -f -- "${cur}"))
 				elif [ "${cword}" -ge 5 ];then
 					if [ "${cur:0:1}" == "-" ];then
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_con} ${__knop_prt} --color --no-color -v --version" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_con} ${__knop_prt}" -- "${cur}"))
 					else
 						compopt -o filenames
 						COMPREPLY=( $(compgen -f -- "${cur}"))
@@ -785,7 +785,7 @@ _knife_completion()
 							fi
 							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
 						elif [ "${cur:0:1}" = "-" ];then
-							COMPREPLY=( $(compgen -W "-a --after ${__knop_srv} ${__knop_cnf} ${__knop_con} ${__knop_prt} --no-color --color -v --version" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "-a --after ${__knop_srv} ${__knop_cnf} ${__knop_con} ${__knop_prt}" -- "${cur}"))
 						else
 							__get_chef_recipes
 							COMPREPLY=( $(compgen -P"'" -W "${__chef_recipes}" -- "${cur}"))
@@ -797,13 +797,13 @@ _knife_completion()
 							__get_chef_roles_name
 							COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
 						elif [ "${cword}" -ge 5 ];then
-							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color --defaults -v --version -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
 						fi
 						;;
 					remove)
 						# knife role run_list remove [ROLE] [ENTRY] (options)
 						if [ "${cur:0:1}" = "-" ];then
-							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color  --defaults -v --version -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
 						else
 							if [ "${COMP_WORDS[4]}" != "${__role}" ];then
 								# new or role changed,get role's run_list
@@ -829,7 +829,7 @@ _knife_completion()
 							__get_chef_recipes
 							COMPREPLY=( $(compgen -P"'" -W "${__chef_recipes}" -- "${cur}"))
 						else
-							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --no-color --color --defaults -v --version -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
 						fi
 						;;
 					esac
