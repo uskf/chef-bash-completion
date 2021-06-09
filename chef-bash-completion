@@ -348,7 +348,7 @@ _knife_completion()
 		esac
 	elif [ "${cword}" -ge 3 ]; then
 		# common options
-		if [ "${prev}" == "-c" -o "${prev}" == "--config" ];then
+		if [ "${prev}" == "-c" -o "${prev}" == "--config" -o "${prev}" == "-i" -o "${prev}" == "--input" ];then
 			compopt -o filenames
 			COMPREPLY=( $(compgen -f -- "${cur}"))
 			return
@@ -881,14 +881,22 @@ _knife_completion()
 					# knife user create USERNAME DISPLAY_NAME FIRST_NAME LAST_NAME EMAIL PASSWORD (options)
 					COMPREPLY=()
 					;;
-				delete|edit)
-					# knife user edit USER (options)
+				delete)
 					# knife user delete USER (options)
 					__get_chef_users
 					if [ "${cword}" -eq 3 ];then
 						COMPREPLY=( $(compgen -W "${__chef_users} -h --help" -- "${cur}"))
 					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} --defaults ${__knop_prt} --with-uri -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --no-disassociate-user -R --remove-from-admin-groups -v --version" -- "${cur}"))
+					fi
+					;;
+				edit)
+					# knife user edit USER (options)
+					__get_chef_users
+					if [ "${cword}" -eq 3 ];then
+						COMPREPLY=( $(compgen -W "${__chef_users} -h --help" -- "${cur}"))
+					else
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} -i --input" -- "${cur}"))
 					fi
 					;;
 				list)
