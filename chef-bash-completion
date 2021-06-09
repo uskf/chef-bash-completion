@@ -538,7 +538,7 @@ _knife_completion()
 					fi
 					COMPREPLY=( $(compgen -W "${__ckver} --all" -- "${cur}"))
 				elif [ "${cword}" -ge 5 ];then
-					COMPREPLY=( $(compgen -W "--all ${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -p --purge -y --yes" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "-a --all ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con} -p --purge" -- "${cur}"))
 				fi
 				;;
 			download)
@@ -670,7 +670,7 @@ _knife_completion()
 					if [ "${prev}" == "-s" -o "${prev}" == "--server-url" ];then
 						COMPREPLY=( )
 					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con}" -- "${cur}"))
 					fi
 				fi
 				;;
@@ -686,7 +686,7 @@ _knife_completion()
 					     "${prev}" == "--field-separator" ];then
 						COMPREPLY=()
 					else
-						COMPREPLY=( $(compgen -W "-a --attribute ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} --defaults -S --field-separator -l --long -m --medium -r --run-list -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "-a --attribute ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} -S --field-separator -l --long -m --medium -r --run-list" -- "${cur}"))
 					fi
 				fi
 				;;
@@ -714,7 +714,7 @@ _knife_completion()
 		recipe)
 			# knife recipe list [PATTERN]
 			if [ "${cword}" -ge 3 ];then
-				COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
+				COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con}" -- "${cur}"))
 			fi
 			;;
 		role)
@@ -728,7 +728,7 @@ _knife_completion()
 						COMPREPLY=( $(compgen -W "-h --help" -- "${cur}"))
 					fi
 				elif [ "${cword}" -ge 5 -a "${COMP_WORDS[4]}" != "-h" -a "${COMP_WORDS[4]}" != "--help" ];then
-					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con}" -- "${cur}"))
 				fi
 				;;
 			create)
@@ -736,7 +736,7 @@ _knife_completion()
 				if [ "${cword}" -eq 3 ];then
 					COMPREPLY=()
 				elif [ "${cword}" -ge 4 ];then
-					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -d --disable-editing -e --editor -y --yes" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --description" -- "${cur}"))
 				fi
 				;;
 			delete)
@@ -744,10 +744,8 @@ _knife_completion()
 				if [ "${cword}" -eq 3 ];then
 					__get_chef_roles_name
 					COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
-				elif [ "${cword}" -eq 4 -a "${COMP_WORDS[3]}" != "-h" -a "${COMP_WORDS[3]}" != "--help" ];then
-					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
-				elif [ "${cword}" -ge 5 ];then
-					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
+				elif [ "${cword}" -ge 4 ];then
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con}" -- "${cur}"))
 				fi
 				;;
 			edit)
@@ -813,13 +811,13 @@ _knife_completion()
 							__get_chef_roles_name
 							COMPREPLY=( $(compgen -W "${__chef_roles_name} -h --help" -- "${cur}"))
 						elif [ "${cword}" -ge 5 ];then
-							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con}" -- "${cur}"))
 						fi
 						;;
 					remove)
 						# knife role run_list remove [ROLE] [ENTRY] (options)
 						if [ "${cur:0:1}" = "-" ];then
-							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con}" -- "${cur}"))
 						else
 							if [ "${COMP_WORDS[4]}" != "${__role}" ];then
 								# new or role changed,get role's run_list
@@ -845,7 +843,7 @@ _knife_completion()
 							__get_chef_recipes
 							COMPREPLY=( $(compgen -P"'" -W "${__chef_recipes}" -- "${cur}"))
 						else
-							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con}" -- "${cur}"))
 						fi
 						;;
 					esac
@@ -861,7 +859,7 @@ _knife_completion()
 					     "${prev}" == "--attribute" ];then
 						COMPREPLY=()
 					else
-						COMPREPLY=( $(compgen -W "-a --attribute ${__knop_srv} ${__knop_cnf} ${__knop_con} ${__knop_prt} -S --field-separator -v --version" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "-a --attribute ${__knop_srv} ${__knop_cnf} ${__knop_con} ${__knop_prt} -S --field-separator" -- "${cur}"))
 					fi
 				fi
 				;;
@@ -907,7 +905,7 @@ _knife_completion()
 					if [ "${cword}" -eq 3 ];then
 						COMPREPLY=( $(compgen -W "${__chef_users} -h --help" -- "${cur}"))
 					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --no-disassociate-user -R --remove-from-admin-groups -v --version" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --no-disassociate-user -R --remove-from-admin-groups" -- "${cur}"))
 					fi
 					;;
 				edit)
@@ -929,7 +927,7 @@ _knife_completion()
 					if [ "${cword}" -eq 3 ];then
 						COMPREPLY=( $(compgen -W "${__chef_users} -h --help" -- "${cur}"))
 					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} --defaults -S --field-separator ${__knop_prt} -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} -S --field-separator" -- "${cur}"))
 					fi
 					;;
 				show)
@@ -944,7 +942,7 @@ _knife_completion()
 						     "${prev}" == "--field-separator" ];then
 							COMPREPLY=()
 						else
-							COMPREPLY=( $(compgen -W "-a --attribute ${__knop_srv} ${__knop_cnf} --defaults -S --field-separator ${__knop_prt} --with-uri -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "-a --attribute ${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} -S --field-separator -l --with-orgs" -- "${cur}"))
 						fi
 					fi
 					;;
