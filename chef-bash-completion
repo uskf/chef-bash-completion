@@ -316,7 +316,7 @@ _knife_completion()
 			COMPREPLY=( $(compgen -W "create delete edit key list reregister show" -- "${cur}"))
 			;;
 		cookbook)
-			COMPREPLY=( $(compgen -W "bulk delete download list metadata show test upload site" -- "${cur}"))
+			COMPREPLY=( $(compgen -W "bulk delete download list metadata show test upload" -- "${cur}"))
 			;;
 		data)
 			COMPREPLY=( $(compgen -W "bag" -- "${cur}"))
