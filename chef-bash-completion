@@ -565,13 +565,12 @@ _knife_completion()
 					COMPREPLY=( $(compgen -W "file" -- "${cur}"))
 					;;
 				list)
-					if [ "${cword}" == 4 ];then
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -p --purge -y --yes" -- "${cur}"))
-					elif [ "${prev}" == "-s" -o "${prev}" == "--server-url" ];then
-						COMPREPLY=( )
-					else
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -p --purge -y --yes" -- "${cur}"))
+					if [ "${prev}" == "-E" -o "${prev}" == "--environment" ]; then
+						__get_chef_environments
+						COMPREPLY=( $(compgen -W "${__chef_environments}" -- "${cur}"))
+						return
 					fi
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} -w --with-uri" -- "${cur}"))
 					;;
 				show)
 					# knife data bag show BAG [ITEM] (options)
@@ -579,7 +578,7 @@ _knife_completion()
 						__get_chef_databags
 						COMPREPLY=( $(compgen -W "${__chef_databags}" -- "${cur}"))
 					elif [ "${cur:0:1}" == "-" ];then
-						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} --defaults ${__knop_prt} --secret -y --yes" -- "${cur}"))
+						COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con} --secret --secret-file --encrypt" -- "${cur}"))
 					fi
 					;;
 				esac
@@ -617,7 +616,7 @@ _knife_completion()
 					set)
 						# knife node run_list set NODE ENTRIES (options)
 						if [ "${cur:0:1}" = "-" ];then
-							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con}" -- "${cur}"))
 						else
 							__get_chef_roles
 							__get_chef_recipes
@@ -627,7 +626,7 @@ _knife_completion()
 					remove)
 						# knife node run_list remove [NODE] [ENTRY [ENTRY]] (options)
 						if [ "${cur:0:1}" = "-" ];then
-							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} --defaults -e --editor -y --yes" -- "${cur}"))
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con}" -- "${cur}"))
 						else
 							if [ "${COMP_WORDS[4]}" != "${__node}" ];then
 								# new or node changed,get node's run_list
