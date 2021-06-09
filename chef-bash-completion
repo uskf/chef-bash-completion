@@ -496,6 +496,16 @@ _knife_completion()
 			;;
 		cookbook)
 			case "${COMP_WORDS[2]}" in
+			bulk)
+				if [ "${cword}" -eq 3 ];then
+					COMPREPLY=( $(compgen -W "delete" -- "${cur}"))
+				elif [ "${cword}" -eq 4 ];then
+					COMPREPLY=()
+				else
+					# knife cookbook bulk delete REGEX (options)
+					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} -p --purge" -- "${cur}"))
+				fi
+				;;
 			test|upload)
 				__get_chef_cookbooks
 				COMPREPLY=( $(compgen -W "${__chef_cookbooks}" -- "${cur}"))
