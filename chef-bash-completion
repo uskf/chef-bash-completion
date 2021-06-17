@@ -818,13 +818,15 @@ _knife_completion()
 						# knife role run_list remove [ROLE] [ENTRY] (options)
 						if [ "${cur:0:1}" = "-" ];then
 							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con}" -- "${cur}"))
-						else
+						elif [ "${COMP_WORDS[4]:0:1}" != "-" -a "${cword}" -eq 5 ]; then
 							if [ "${COMP_WORDS[4]}" != "${__role}" ];then
 								# new or role changed,get role's run_list
 								__runlist=$(knife role show ${COMP_WORDS[4]} ${__chef_credential} | grep 'recipe\[' | sed 's/run_list://' | tr -d " ")
 								__role=${COMP_WORDS[4]}
 							fi
 							COMPREPLY=( $(compgen -P"'" -S "'" -W "${__runlist}" -- "${cur}"))
+						else
+							COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con}" -- "${cur}"))
 						fi
 						;;
 					replace)
