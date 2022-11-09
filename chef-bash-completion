@@ -280,24 +280,40 @@ _knife_completion()
 			__chef_credential=""
 		elif [ -f ${HOME}/.chef/config.rb ];then
 			__chef_credential="-c ${HOME}/.chef/config.rb"
+		elif [ -f ${HOME}/.cinc/config.rb ];then
+			__chef_credential="-c ${HOME}/.cinc/config.rb"
 		elif [ -f ${HOME}/.chef/knife.rb ];then
 			__chef_credential="-c ${HOME}/.chef/knife.rb"
+		elif [ -f ${HOME}/.cinc/knife.rb ];then
+			__chef_credential="-c ${HOME}/.cinc/knife.rb"
 		elif [ -f ${HOME}/${__repodir}/.chef/config.rb ];then
 			__chef_credential="-c ${HOME}/${__repodir}/.chef/config.rb"
+		elif [ -f ${HOME}/${__repodir}/.cinc/config.rb ];then
+			__chef_credential="-c ${HOME}/${__repodir}/.cinc/config.rb"
 		elif [ -f ${HOME}/${__repodir}/.chef/knife.rb ];then
 			__chef_credential="-c ${HOME}/${__repodir}/.chef/knife.rb"
+		elif [ -f ${HOME}/${__repodir}/.cinc/knife.rb ];then
+			__chef_credential="-c ${HOME}/${__repodir}/.cinc/knife.rb"
 		fi
 	fi
 
 	if [ -z "${__chef_conf_path}" ]; then
 		if [ -f ${HOME}/.chef/config.rb ];then
 			__chef_conf_path="${HOME}/.chef/config.rb"
+		elif [ -f ${HOME}/.cinc/config.rb ];then
+			__chef_conf_path="${HOME}/.cinc/config.rb"
 		elif [ -f ${HOME}/.chef/knife.rb ];then
 			__chef_conf_path="${HOME}/.chef/knife.rb"
+		elif [ -f ${HOME}/.cinc/knife.rb ];then
+			__chef_conf_path="${HOME}/.cinc/knife.rb"
 		elif [ -f ${HOME}/${__repodir}/.chef/config.rb ];then
 			__chef_conf_path="${HOME}/${__repodir}/.chef/config.rb"
+		elif [ -f ${HOME}/${__repodir}/.cinc/config.rb ];then
+			__chef_conf_path="${HOME}/${__repodir}/.cinc/config.rb"
 		elif [ -f ${HOME}/${__repodir}/.chef/knife.rb ];then
 			__chef_conf_path="${HOME}/${__repodir}/.chef/knife.rb"
+		elif [ -f ${HOME}/${__repodir}/.cinc/knife.rb ];then
+			__chef_conf_path="${HOME}/${__repodir}/.cinc/knife.rb"
 		fi
 	fi
 
