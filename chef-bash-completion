@@ -378,7 +378,11 @@ _knife_completion()
 			COMPREPLY=( $(compgen -f -- "${cur}"))
 			return
 		elif [ "${prev}" == "-F" -o "${prev}" == "--format" ];then
-			COMPREPLY=( $(compgen -W "json text yaml pp" -- "${cur}"))
+			COMPREPLY=( $(compgen -W "summary json text yaml pp" -- "${cur}"))
+			return
+		elif [ "${prev}" == "-E" -o "${prev}" == "--environment" ];then
+			__get_chef_environments
+			COMPREPLY=( $(compgen -W "${__chef_environments}" -- "${cur}"))
 			return
 		elif [ "${prev}" == "-s" -o \
 		       "${prev}" == "--server-url" -o \
@@ -387,6 +391,8 @@ _knife_completion()
 		       "${prev}" == "-k" -o \
 		       "${prev}" == "--key" -o \
 		       "${prev}" == "--config-option" -o \
+		       "${prev}" == "-e" -o \
+		       "${prev}" == "--editor" -o \
 		       "${prev}" == "-u" -o \
 		       "${prev}" == "--user" -o \
 		       "${prev}" == "--profile" ];then
