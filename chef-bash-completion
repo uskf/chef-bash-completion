@@ -363,6 +363,8 @@ _knife_completion()
 				__get_chef_nodes
 				__prefixed_nodes=$(for n in ${__chef_nodes};do echo "name:$n";done)
 				COMPREPLY=( $(compgen -P'"' -W "${__prefixed_nodes}" -- "${cur}"))
+			else
+				COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con} ${__knop_env} --hide-by-mins -l --long -m --medium -r --run-list -s --sort-reverse" -- "${cur}"))
 			fi
 			;;
 		user)
@@ -893,7 +895,11 @@ _knife_completion()
 			;;
 		status)
 			# knife status QUERY (options)
-			COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} -l --long -m --medium -r --run-list --sort-reverse" -- "${cur}"))
+			if [ "${prev}" == "--hide-by-mins" ];then
+				COMPREPLY=()
+			else
+				COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} --hide-by-mins -l --long -m --medium -r --run-list -s --sort-reverse" -- "${cur}"))
+			fi
 			;;
 		user)
 			if [ "${COMP_WORDS[2]}" == "key" ];then
