@@ -477,7 +477,6 @@ _knife_completion()
 				COMPREPLY=( $(compgen -W "plaintext kerberos ssl negotiate" -- "${cur}"))
 			elif [ "${prev}" == "--bootstrap-vault-file" -o \
 			       "${prev}" == "--json-attribute-file" -o \
-			       "${prev}" == "--identity-file" -o \
 			       "${prev}" == "--secret-file" -o \
 			       "${prev}" == "-i" -o \
 			       "${prev}" == "--ssh-gateway-identity" -o \
