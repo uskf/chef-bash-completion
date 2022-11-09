@@ -332,7 +332,7 @@ _knife_completion()
 			COMPREPLY=( $(compgen -W "create delete edit key list reregister show" -- "${cur}"))
 			;;
 		cookbook)
-			COMPREPLY=( $(compgen -W "bulk delete download list metadata show test upload" -- "${cur}"))
+			COMPREPLY=( $(compgen -W "bulk delete download list metadata show upload" -- "${cur}"))
 			;;
 		data)
 			COMPREPLY=( $(compgen -W "bag" -- "${cur}"))
@@ -529,7 +529,7 @@ _knife_completion()
 					COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_env} ${__knop_con} -p --purge" -- "${cur}"))
 				fi
 				;;
-			test|upload)
+			upload)
 				__get_chef_cookbooks
 				COMPREPLY=( $(compgen -W "${__chef_cookbooks}" -- "${cur}"))
 				;;
