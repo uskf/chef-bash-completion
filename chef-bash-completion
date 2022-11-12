@@ -456,17 +456,13 @@ _knife_completion()
 			     "${prev}" == "--profile" -o \
 			     "${prev}" == "-r" -o \
 			     "${prev}" == "--run-list" -o \
-			     "${prev}" == "--session-timeout" -o \
 			     "${prev}" == "-G" -o \
+			     "${prev}" == "--session-timeout" -o \
 			     "${prev}" == "--ssh-gateway" -o \
 			     "${prev}" == "--su-password" -o \
 			     "${prev}" == "--su-user" -o \
 			     "${prev}" == "--tags" -o \
-			     "${prev}" == "--winrm-ssl-peer-fingerprint" -o \
-			     "${prev}" == "--ssh-password" -o \
-			     "${prev}" == "--ssh-port" -o \
-			     "${prev}" == "--ssh-user" -o \
-			     "${prev}" == "--ssl-peer-fingerprint" ];then
+			     "${prev}" == "--winrm-ssl-peer-fingerprint" ];then
 				COMPREPLY=()
 			elif [ "${prev}" == "-E" -o "${prev}" == "--environment" ];then
 				__get_chef_environments
@@ -483,6 +479,8 @@ _knife_completion()
 				COMPREPLY=( $(compgen -W "accept accept-no-persist accept-silent" -- "${cur}"))
 			elif [ "${prev}" == "-w" -o "${prev}" == "--winrm-auth-method" ];then
 				COMPREPLY=( $(compgen -W "plaintext kerberos ssl negotiate" -- "${cur}"))
+			elif [ "${prev}" == "--ssh-verify-host-key" ];then
+				COMPREPLY=( $(compgen -W "always accept accept_new accept_new_or_local_tunnel never" -- "${cur}"))
 			elif [ "${prev}" == "--bootstrap-vault-file" -o \
 			       "${prev}" == "--json-attribute-file" -o \
 			       "${prev}" == "--secret-file" -o \
@@ -492,7 +490,7 @@ _knife_completion()
 				compopt -o filenames
 				COMPREPLY=( $(compgen -f -- "${cur}"))
 			else
-				COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con} ${__knop_env} --bootstrap-curl-options --bootstrap-install-command --bootstrap-no-proxy --bootstrap-preinstall-command --bootstrap-product --bootstrap-proxy --bootstrap-proxy-pass --bootstrap-proxy-user -t --bootstrap-template --bootstrap-url --bootstrap-vault-file --bootstrap-vault-item --bootstrap-vault-json --bootstrap-version --bootstrap-wget-options -f --ca-trust-file --channel --chef-license -N --node-name --secret --secret-file -P --connection-password -p --connection-port -o --connection-protocol -U --connection-user --encrypt -j --json-attributes --json-attribute-file --hint -R --kerberos-realm -S --kerberos-service -W --max-wait -m --msi-url --node-ssl-verify-mode --no-node-verify-api-cert --node-verify-api-cert --policy-group --policy-name --sudo-preserve-home -r --run-list --session-timeout -A --ssh-forward-agent -G --ssh-gateway --ssh-gateway-identity -i --ssh-identity-file --ssh-verify-host-key --su-password --su-user --tags --sudo --use-sudo-password -w --winrm-auth-method --winrm-basic-auth-only --winrm-no-verify-cert --winrm-ssl --winrm-ssl-peer-fingerprint --forward-agent --no-host-key-verify --host-key-verify --prerelease --ssh-password --ssh-port --ssh-user --ssl-peer-fingerprint --winrm-authentication-protocol --winrm-password --winrm-port --winrm-session-timeout --winrm-ssl-verify-mode --winrm-transport -x --winrm-user" -- "${cur}"))
+				COMPREPLY=( $(compgen -W "${__knop_srv} ${__knop_cnf} ${__knop_prt} ${__knop_con} ${__knop_env} --bootstrap-curl-options --bootstrap-install-command --bootstrap-no-proxy --bootstrap-preinstall-command --bootstrap-product --bootstrap-proxy --bootstrap-proxy-pass --bootstrap-proxy-user -t --bootstrap-template --bootstrap-url --bootstrap-vault-file --bootstrap-vault-item --bootstrap-vault-json --bootstrap-version --bootstrap-wget-options -f --ca-trust-file --channel --chef-license -N --node-name --secret --secret-file -P --connection-password -p --connection-port -o --connection-protocol -U --connection-user --encrypt -j --json-attributes --json-attribute-file --hint -R --kerberos-realm -S --kerberos-service -W --max-wait -m --msi-url --node-ssl-verify-mode --no-node-verify-api-cert --node-verify-api-cert --policy-group --policy-name --session-timeout --sudo-preserve-home -r --run-list -A --ssh-forward-agent -G --ssh-gateway --ssh-gateway-identity -i --ssh-identity-file --ssh-verify-host-key --su-password --su-user --tags --sudo --use-sudo-password -w --winrm-auth-method --winrm-basic-auth-only --winrm-no-verify-cert --winrm-ssl --winrm-ssl-peer-fingerprint -x" -- "${cur}"))
 			fi
 			;;
 		client)
