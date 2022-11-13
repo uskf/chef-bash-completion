@@ -535,6 +535,7 @@ _knife_completion()
 				fi
 				;;
 			upload)
+				__chef_cookbooks=
 				__get_chef_cookbooks
 				COMPREPLY=( $(compgen -W "${__chef_cookbooks}" -- "${cur}"))
 				;;
