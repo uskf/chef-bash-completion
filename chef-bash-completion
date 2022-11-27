@@ -155,6 +155,10 @@ _chef_completion()
 	_get_comp_words_by_ref -n : cur prev cword
 
 	COMPREPLY=()
+        __copt_lic="--chef-license"
+        __copt_gen="-C --copyright -m --email -a --generator-arg -I --license -g --generator-cookbook"
+        __copt_prt="-h --help -v --version"
+
 	if [ "${cword}" -eq 1 ]; then
 		COMPREPLY=( $(compgen -W "exec env gem generate shell-init install update push push-archive show-policy diff export clean-policy-revisions clean-policy-cookbooks delete-policy-group delete-policy undelete describe-cookbook report capture" -- "${cur}"))
 	elif [ "${cword}" -eq 2 ]; then
@@ -174,44 +178,71 @@ _chef_completion()
 			;;
 		esac
 	elif [ "${cword}" -ge 3 ]; then
+		# common options
+		if [ "${prev}" == "--chef-license" ];then
+			COMPREPLY=( $(compgen -W "accept accept-no-persist accept-silent" -- "${cur}"))
+			return
+		elif [ "${prev}" == "-I" -o "${prev}" == "--license" ];then
+			COMPREPLY=( $(compgen -W "all_rights apachev2 mit gplv2 gplv3" -- "${cur}"))
+			return
+		elif [ "${prev}" == "-C" -o \
+		       "${prev}" == "--copyright" -o \
+		       "${prev}" == "-m" -o \
+		       "${prev}" == "--email" -o \
+		       "${prev}" == "-a" -o \
+		       "${prev}" == "--generator-arg" ];then
+			COMPREPLY=()
+			return
+		fi
+
 		case "${COMP_WORDS[1]}" in
 		generate)
+			if [ "${prev}" == "-g" -o "${prev}" == "--generator-cookbook" ];then
+				compopt -o filenames
+				COMPREPLY=( $(compgen -d -- "${cur}"))
+				return
+			fi
+
 			if [ "${cword}" -eq 3 ]; then
 				case "${COMP_WORDS[2]}" in
-				attribute)
+				attribute|cookbook|file|helpers|recipe|resource|template)
 					compopt -o filenames
-					COMPREPLY=( $(compgen -d -- "${cur}"))
+					COMPREPLY=( $(compgen -d -W "${__copt_prt}" -- "${cur}"))
 					;;
-				cookbook)
-					compopt -o filenames
-					COMPREPLY=( $(compgen -d -- "${cur}"))
-					;;
-				file)
-					compopt -o filenames
-					COMPREPLY=( $(compgen -d -- "${cur}"))
-					;;
-				recipe)
-					compopt -o filenames
-					COMPREPLY=( $(compgen -d -- "${cur}"))
-					;;
-				template)
+				repo)
 					compopt -o filenames
 					COMPREPLY=( $(compgen -d -- "${cur}"))
 					;;
 				esac
 			elif [ "${cword}" -eq 4 ]; then
 				case "${COMP_WORDS[2]}" in
+				attribute|file|helpers|recipe|resource|template)
+					COMPREPLY=()
+					;;
 				cookbook)
-					COMPREPLY=( $(compgen -W "-b --berks -C --copyright -d --delivery -m --email -a --generator-arg -h --help --kitchen -I --license --pipeline -P --policy -V --verbose -v --version -g --generator-cookbook" -- "${cur}"))
+					COMPREPLY=( $(compgen -W "-b --berks ${__copt_lic} ${__copt_gen} -v --version --kitchen --pipeline -P --policy -V --verbose -w --workflow" -- "${cur}"))
+					;;
+				repo)
+					COMPREPLY=( $(compgen -W "${__copt_lic} ${__copt_gen} ${__copt_prt} -P --policy -p --policy-only -r --roles -V --verbose" -- "${cur}"))
 					;;
 				esac
-			elif [ "${cword}" -eq 5 ]; then
+			elif [ "${cword}" -ge 5 ]; then
 				case "${COMP_WORDS[2]}" in
-				attribute|recipe)
-					COMPREPLY=( $(compgen -W "-C --copyright -m --email -a --generator-arg -h --help -I --license -v --version -g --generator-cookbook" -- "${cur}"))
+				attribute|helpers|recipe|resource)
+					COMPREPLY=( $(compgen -W "${__copt_gen} -v --version" -- "${cur}"))
+					;;
+				cookbook)
+					COMPREPLY=( $(compgen -W "-b --berks ${__copt_lic} ${__copt_gen} -v --version --kitchen --pipeline -P --policy -V --verbose -w --workflow" -- "${cur}"))
 					;;
 				file|template)
-					COMPREPLY=( $(compgen -W "-C --copyright -m --email -a --generator-arg -h --help -I --license -s --source -v --version -g --generator-cookbook" -- "${cur}"))
+					if [ "${prev}" == "-s" -o "${prev}" == "--source" ];then
+						COMPREPLY=()
+					else
+						COMPREPLY=( $(compgen -W "${__copt_gen} -s --source -v --version" -- "${cur}"))
+					fi
+					;;
+				repo)
+					COMPREPLY=( $(compgen -W "${__copt_lic} ${__copt_gen} ${__copt_prt} -P --policy -p --policy-only -r --roles -V --verbose" -- "${cur}"))
 					;;
 				esac
 			fi
