@@ -167,7 +167,7 @@ _chef_completion()
 			COMPREPLY=( $(compgen -W "build cert check cleanup contents dependency environment fetch generate_index help info install list lock mirror open outdated owner pristine push query rdoc search server signin signout sources specification stale uninstall unpack update which yank" -- "${cur}"))
 			;;
 		generate)
-			COMPREPLY=( $(compgen -W "cookbook recipe attribute template file helpers lwrp resource repo policyfile generator build-cookbook" -- "${cur}"))
+			COMPREPLY=( $(compgen -W "cookbook recipe attribute template file helpers resource repo policyfile generator build-cookbook" -- "${cur}"))
 			;;
 		report)
 			COMPREPLY=( $(compgen -W "cookbooks nodes -h --help" -- "${cur}"))
